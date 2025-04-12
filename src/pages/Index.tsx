@@ -1,11 +1,21 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from "react";
+import { Navigate } from "react-router-dom";
+import LoginForm from "@/components/LoginForm";
+import { useAuth } from "@/utils/auth";
 
 const Index = () => {
+  const { isAuthenticated } = useAuth();
+  
+  // Redirect to dashboard if already authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 p-4">
+      <div className="w-full max-w-md">
+        <LoginForm />
       </div>
     </div>
   );
