@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUp, FileQuestion, Check, AlertCircle } from "lucide-react";
 import { parseXML, validateXmlSecurity, saveProcessedXml, getSampleXmlData } from "@/utils/xmlUtils";
 import { xmlUploadSchema, validateData } from "@/utils/validation";
@@ -23,6 +24,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
   const [validationIssues, setValidationIssues] = useState<string[]>([]);
+  const [xmlFormat, setXmlFormat] = useState<"standard" | "brazilian">("standard");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +86,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       // If we made it here, the file is valid
       setValidationStatus('valid');
       logAuditEvent("xml_validation_success", { filename: file.name });
-      toast.success("XML validated successfully");
+      toast.success("XML validado com sucesso");
       setProgress(100);
     } catch (err) {
       console.error("XML validation error:", err);
@@ -139,7 +141,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
         fileInputRef.current.value = "";
       }
       
-      toast.success("XML processed successfully");
+      toast.success("XML processado com sucesso");
     } catch (err) {
       console.error("XML processing error:", err);
       setError(`Error processing XML: ${err instanceof Error ? err.message : String(err)}`);
@@ -173,7 +175,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
   };
 
   const loadSampleData = () => {
-    const sampleData = getSampleXmlData();
+    const sampleData = getSampleXmlData(xmlFormat);
     setValidationStatus('validating');
     setProgress(30);
     
@@ -197,8 +199,8 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
         // Process the sample data
         parseXML(sampleData).then(parsedData => {
           onUploadSuccess(parsedData, sampleData);
-          logAuditEvent("sample_data_loaded", {});
-          toast.success("Sample data loaded successfully");
+          logAuditEvent("sample_data_loaded", { format: xmlFormat });
+          toast.success(`Dados de amostra de ${xmlFormat === "brazilian" ? "formato brasileiro" : "formato padrão"} carregados com sucesso`);
         });
       } catch (err) {
         console.error("Error loading sample data:", err);
@@ -210,9 +212,9 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>XML Upload</CardTitle>
+        <CardTitle>Upload de XML</CardTitle>
         <CardDescription>
-          Upload a ration formula XML file for processing
+          Faça upload de um arquivo XML de fórmula de ração para processamento
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -225,7 +227,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
         
         <div className="space-y-4">
           <div className="grid w-full items-center gap-2">
-            <Label htmlFor="xml-file">Formula XML File</Label>
+            <Label htmlFor="xml-file">Arquivo XML de Fórmula</Label>
             <Input
               ref={fileInputRef}
               id="xml-file"
@@ -236,10 +238,31 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
             />
           </div>
           
+          <div className="grid w-full items-center gap-2">
+            <Label htmlFor="xml-format">Formato do XML</Label>
+            <Select
+              value={xmlFormat}
+              onValueChange={(value: "standard" | "brazilian") => setXmlFormat(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o formato" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">Formato Padrão Internacional</SelectItem>
+                <SelectItem value="brazilian">Formato Brasileiro</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              {xmlFormat === "brazilian" 
+                ? "Formato adaptado para o padrão brasileiro de prescrição de ração"
+                : "Formato padrão internacional de fórmula de ração"}
+            </p>
+          </div>
+          
           {validationStatus === 'validating' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm">Validating XML...</span>
+                <span className="text-sm">Validando XML...</span>
                 <span className="text-sm">{progress}%</span>
               </div>
               <Progress value={progress} className="w-full" />
@@ -250,7 +273,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
             <Alert className="bg-ration-success/10 border-ration-success">
               <Check className="h-4 w-4 text-ration-success" />
               <AlertDescription className="text-ration-success">
-                XML validated successfully. Ready to process.
+                XML validado com sucesso. Pronto para processar.
               </AlertDescription>
             </Alert>
           )}
@@ -260,7 +283,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  XML validation failed. Please check the issues below.
+                  Falha na validação do XML. Verifique os problemas abaixo.
                 </AlertDescription>
               </Alert>
               <ul className="list-disc pl-5 text-sm text-destructive space-y-1">
@@ -279,7 +302,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
           disabled={isUploading}
         >
           <FileQuestion className="mr-2 h-4 w-4" />
-          Load Sample
+          Carregar Amostra {xmlFormat === "brazilian" ? "Brasileira" : "Padrão"}
         </Button>
         
         <div className="space-x-2">
@@ -288,7 +311,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
             onClick={validateFile}
             disabled={!file || isUploading || validationStatus === 'validating'}
           >
-            Validate XML
+            Validar XML
           </Button>
           
           <Button
@@ -304,16 +327,16 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
               <>
                 <span className="opacity-0">
                   <FileUp className="mr-2 h-4 w-4" />
-                  Process XML
+                  Processar XML
                 </span>
                 <span className="absolute inset-0 flex items-center justify-center">
-                  Processing... {progress}%
+                  Processando... {progress}%
                 </span>
               </>
             ) : (
               <>
                 <FileUp className="mr-2 h-4 w-4" />
-                Process XML
+                Processar XML
               </>
             )}
           </Button>

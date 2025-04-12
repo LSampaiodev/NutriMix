@@ -1,10 +1,15 @@
-
 // XML Processing Utilities
+import { isBrazilianRationXml, convertBrazilianRationXml } from "./brXmlAdapter";
 
 // Function to parse XML string to JavaScript object
 export const parseXML = (xmlString: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
+      // Verificar se é um XML brasileiro e converter se necessário
+      if (isBrazilianRationXml(xmlString)) {
+        xmlString = convertBrazilianRationXml(xmlString);
+      }
+      
       // Using DOMParser for client-side XML parsing
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -105,6 +110,33 @@ export const validateXmlSecurity = (xmlString: string): { valid: boolean; issues
     issues.push("XML file is too large (max 10MB)");
   }
   
+  // Se for um XML brasileiro, verificamos se está bem formado
+  if (isBrazilianRationXml(xmlString)) {
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+      
+      // Verifica se há elementos obrigatórios
+      if (!xmlDoc.getElementsByTagName("PrescricaoRacao").length) {
+        issues.push("XML brasileiro deve ter o elemento raiz <PrescricaoRacao>");
+      }
+      
+      if (!xmlDoc.getElementsByTagName("Produto").length) {
+        issues.push("XML brasileiro deve ter a seção <Produto>");
+      }
+      
+      if (!xmlDoc.getElementsByTagName("Fabricante").length) {
+        issues.push("XML brasileiro deve ter a seção <Fabricante>");
+      }
+      
+      if (!xmlDoc.getElementsByTagName("Composicao").length) {
+        issues.push("XML brasileiro deve ter a seção <Composicao>");
+      }
+    } catch (error) {
+      issues.push(`Erro ao analisar XML brasileiro: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
   return {
     valid: issues.length === 0,
     issues
@@ -112,8 +144,82 @@ export const validateXmlSecurity = (xmlString: string): { valid: boolean; issues
 };
 
 // Mock function to get sample XML data (for demo purposes)
-export const getSampleXmlData = (): string => {
-  return `<?xml version="1.0" encoding="UTF-8"?>
+export const getSampleXmlData = (format: "standard" | "brazilian" = "standard"): string => {
+  if (format === "brazilian") {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<PrescricaoRacao>
+  <Produto>
+    <Nome>Ração Premium para Cães Adultos</Nome>
+    <Tipo>Seca</Tipo>
+    <Peso>15kg</Peso>
+    <DataFabricacao>2025-04-10</DataFabricacao>
+    <Validade>2025-10-10</Validade>
+    <CodigoLote>ABC123456</CodigoLote>
+  </Produto>
+
+  <Fabricante>
+    <RazaoSocial>NutriPet Alimentos Ltda</RazaoSocial>
+    <CNPJ>12.345.678/0001-99</CNPJ>
+    <Endereco>Rua dos Animais, 123 - São Paulo - SP</Endereco>
+  </Fabricante>
+
+  <Composicao>
+    <Ingrediente>
+      <Nome>Farinha de carne e ossos</Nome>
+      <Quantidade>25%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Milho moído</Nome>
+      <Quantidade>30%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Farelo de soja</Nome>
+      <Quantidade>20%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Gordura de frango</Nome>
+      <Quantidade>10%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Vitaminas e Minerais</Nome>
+      <Quantidade>5%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Palatabilizante</Nome>
+      <Quantidade>1%</Quantidade>
+    </Ingrediente>
+    <Ingrediente>
+      <Nome>Antioxidante</Nome>
+      <Quantidade>0.1%</Quantidade>
+    </Ingrediente>
+  </Composicao>
+
+  <Garantias>
+    <Garantia>
+      <Nome>Proteína Bruta</Nome>
+      <Minimo>22%</Minimo>
+    </Garantia>
+    <Garantia>
+      <Nome>Extrato Etéreo</Nome>
+      <Minimo>10%</Minimo>
+    </Garantia>
+    <Garantia>
+      <Nome>Fibra Bruta</Nome>
+      <Maximo>4%</Maximo>
+    </Garantia>
+    <Garantia>
+      <Nome>Umidade</Nome>
+      <Maximo>12%</Maximo>
+    </Garantia>
+  </Garantias>
+
+  <ModoDeUso>
+    Fornecer de acordo com o peso do animal, dividindo a porção diária em duas refeições.
+    Deixe água limpa e fresca disponível o tempo todo.
+  </ModoDeUso>
+</PrescricaoRacao>`;
+  } else {
+    return `<?xml version="1.0" encoding="UTF-8"?>
 <RationFormula id="RF-2023-001" version="1.0">
   <Metadata>
     <Name>Balanced Poultry Growth Formula</Name>
@@ -338,6 +444,7 @@ export const getSampleXmlData = (): string => {
     </Certification>
   </Certifications>
 </RationFormula>`;
+  }
 };
 
 // Parse the XML string and return data needed for label generation

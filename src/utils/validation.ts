@@ -17,6 +17,39 @@ export const xmlUploadSchema = z.object({
     )
 });
 
+// Schema for brazilian XML
+export const brazilianXmlSchema = z.object({
+  PrescricaoRacao: z.object({
+    Produto: z.object({
+      Nome: z.string().min(1, "Nome do produto é obrigatório"),
+      Tipo: z.string().optional(),
+      Peso: z.string().optional(),
+      DataFabricacao: z.string().optional(),
+      Validade: z.string().optional(),
+      CodigoLote: z.string().optional()
+    }),
+    Fabricante: z.object({
+      RazaoSocial: z.string().min(1, "Razão social é obrigatória"),
+      CNPJ: z.string().optional(),
+      Endereco: z.string().optional()
+    }),
+    Composicao: z.object({
+      Ingrediente: z.array(z.object({
+        Nome: z.string(),
+        Quantidade: z.string()
+      }))
+    }),
+    Garantias: z.object({
+      Garantia: z.array(z.object({
+        Nome: z.string(),
+        Minimo: z.string().optional(),
+        Maximo: z.string().optional()
+      }))
+    }),
+    ModoDeUso: z.string().optional()
+  })
+});
+
 // Schema for user creation
 export const userSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),

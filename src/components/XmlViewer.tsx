@@ -224,6 +224,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
             )}
           </TabsContent>
           
+          {/* Fix for the TypeScript error - ensuring we're not rendering unknown types */}
           <TabsContent value="ingredients" className="p-4">
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-6">
@@ -263,7 +264,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                             {Object.entries(ing.nutritionalValues).map(([key, value]) => (
                               <div key={key} className="text-sm border rounded p-2">
                                 <span className="text-xs text-muted-foreground">{key}</span>
-                                <div>{value}</div>
+                                <div>{String(value)}</div>
                               </div>
                             ))}
                           </div>
