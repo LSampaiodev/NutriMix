@@ -452,61 +452,191 @@ export const extractLabelData = (xmlObj: any): any => {
   try {
     const formula = xmlObj;
     
-    // Extract basic information
-    const metadata = formula.Metadata || {};
-    const labelInfo = formula.LabelingInformation || {};
-    const nutritionalProfile = formula.NutritionalProfile || {};
+    // Extract basic information - check if we're dealing with Brazilian format
+    const isBrazilianFormat = formula.PrescricaoRacao !== undefined;
     
-    // Handle potentially missing guaranteedAnalysis
-    const guaranteedAnalysis = labelInfo.GuaranteedAnalysis || {};
-    const guaranteedComponents = guaranteedAnalysis.Component || [];
+    let metadata, labelInfo, nutritionalProfile, guaranteedAnalysis, ingredients, feedingDirections;
     
-    // Ensure guaranteedAnalysis.Component is always an array
-    const components = Array.isArray(guaranteedComponents) 
-      ? guaranteedComponents 
-      : guaranteedComponents ? [guaranteedComponents] : [];
+    if (isBrazilianFormat) {
+      // Map Brazilian format to standard format
+      metadata = {
+        Name: formula.PrescricaoRacao?.Produto?.Nome || "Sem nome",
+        Category: formula.PrescricaoRacao?.Produto?.Tipo || "Não categorizada",
+        SubCategory: ""
+      };
+      
+      labelInfo = {
+        ProductName: formula.PrescricaoRacao?.Produto?.Nome || "Produto sem nome",
+        Manufacturer: formula.PrescricaoRacao?.Fabricante?.RazaoSocial || "Fabricante desconhecido",
+        ManufacturerAddress: formula.PrescricaoRacao?.Fabricante?.Endereco || "Endereço não especificado",
+        RegistrationNumber: formula.PrescricaoRacao?.Fabricante?.CNPJ || "Sem registro",
+        StorageInstructions: "Armazenar em local seco e arejado",
+        ShelfLife: {
+          "#text": formula.PrescricaoRacao?.Produto?.Validade 
+            ? new Date(formula.PrescricaoRacao.Produto.Validade).toLocaleDateString() 
+            : "Não especificado",
+          "@attributes": { unit: "dias" }
+        }
+      };
+      
+      // Extract Brazilian ingredients safely
+      const brazilianIngredients = formula.PrescricaoRacao?.Composicao?.Ingrediente || [];
+      const ingredientsList = Array.isArray(brazilianIngredients)
+        ? brazilianIngredients.map((ing: any) => ing.Nome || "Ingrediente desconhecido")
+        : brazilianIngredients?.Nome ? [brazilianIngredients.Nome] : ["Nenhum ingrediente especificado"];
+      
+      // Map Brazilian guarantees to standard format
+      const brazilianGuarantees = formula.PrescricaoRacao?.Garantias?.Garantia || [];
+      const guaranteeComponents = Array.isArray(brazilianGuarantees)
+        ? brazilianGuarantees.map((garantia: any) => {
+            // Create object with @attributes structure to match standard format
+            return {
+              "@attributes": {
+                name: garantia.Nome || "Desconhecido",
+                minimum: garantia.Minimo || undefined,
+                maximum: garantia.Maximo || undefined,
+                unit: "%"
+              }
+            };
+          })
+        : brazilianGuarantees?.Nome
+          ? [{
+              "@attributes": {
+                name: brazilianGuarantees.Nome || "Desconhecido",
+                minimum: brazilianGuarantees.Minimo || undefined,
+                maximum: brazilianGuarantees.Maximo || undefined,
+                unit: "%"
+              }
+            }]
+          : [];
+      
+      // Map feeding directions
+      feedingDirections = {
+        AnimalType: "Cães",  // Assuming this based on product name
+        AnimalAge: { "#text": "Adultos", "@attributes": { unit: "" } },
+        DailyAmount: "Conforme recomendação",
+        SpecialInstructions: formula.PrescricaoRacao?.ModoDeUso || "Sem instruções especiais"
+      };
+      
+      guaranteedAnalysis = { Component: guaranteeComponents };
+      ingredients = ingredientsList;
+    } else {
+      // Standard format processing (existing code)
+      metadata = formula.Metadata || {};
+      labelInfo = formula.LabelingInformation || {};
+      nutritionalProfile = formula.NutritionalProfile || {};
+      
+      // Handle potentially missing guaranteedAnalysis
+      guaranteedAnalysis = labelInfo.GuaranteedAnalysis || {};
+      const guaranteedComponents = guaranteedAnalysis.Component || [];
+      
+      // Ensure guaranteedAnalysis.Component is always an array
+      const components = Array.isArray(guaranteedComponents) 
+        ? guaranteedComponents 
+        : guaranteedComponents ? [guaranteedComponents] : [];
+      
+      // Extract ingredients list safely
+      const ingredientsList = formula.Ingredients?.Ingredient || [];
+      ingredients = Array.isArray(ingredientsList) 
+        ? ingredientsList.map((ing: any) => ing.Name || "Unknown Ingredient") 
+        : ingredientsList?.Name ? [ingredientsList.Name] : ["No ingredients specified"];
+      
+      // Safely extract feeding directions
+      feedingDirections = labelInfo.FeedingDirections || {};
+      
+      // Update component assignment for standard format
+      guaranteedAnalysis = { Component: components };
+    }
     
-    // Extract ingredients list safely
-    const ingredients = formula.Ingredients?.Ingredient || [];
-    const ingredientsList = Array.isArray(ingredients) 
-      ? ingredients.map((ing: any) => ing.Name || "Unknown Ingredient") 
-      : ingredients?.Name ? [ingredients.Name] : ["No ingredients specified"];
+    // Safely handle feeding directions with fallbacks
+    const animalAge = feedingDirections?.AnimalAge || "Not specified";
+    let ageValue = "Not specified";
+    let ageUnit = "";
     
-    // Safely extract feeding directions
-    const feedingDirections = labelInfo.FeedingDirections || {};
-    
-    // Handle attributes safely with default values
-    const animalAge = feedingDirections.AnimalAge || "Not specified";
-    const ageUnit = animalAge["@attributes"]?.unit || "";
+    if (typeof animalAge === 'object') {
+      ageValue = animalAge["#text"] || "Not specified";
+      ageUnit = animalAge["@attributes"]?.unit || "";
+    } else {
+      ageValue = animalAge;
+    }
     
     // Safely get shelf life and its unit
-    const shelfLife = labelInfo.ShelfLife || "Not specified";
-    const shelfLifeUnit = (typeof shelfLife === 'object' && shelfLife["@attributes"]) 
-      ? shelfLife["@attributes"].unit || ""
-      : "months";
+    const shelfLife = labelInfo?.ShelfLife || "Not specified";
+    let shelfLifeValue = "Not specified";
+    let shelfLifeUnit = "months";
+    
+    if (typeof shelfLife === 'object') {
+      shelfLifeValue = shelfLife["#text"] || "Not specified";
+      shelfLifeUnit = shelfLife["@attributes"]?.unit || "months";
+    } else {
+      shelfLifeValue = shelfLife;
+    }
+    
+    // Ensure guaranteedAnalysis.Component is always an array with safe property access
+    const guaranteedComponents = guaranteedAnalysis?.Component || [];
+    const safeComponents = Array.isArray(guaranteedComponents) 
+      ? guaranteedComponents 
+      : [guaranteedComponents];
+    
+    // Add defensive checks for accessing properties
+    const safeCheckComponents = safeComponents.map(comp => {
+      // Ensure comp has @attributes, if not create it
+      if (!comp || typeof comp !== 'object') {
+        return { "@attributes": { name: "Unknown", unit: "%" } };
+      }
+      
+      if (!comp["@attributes"]) {
+        return { 
+          "@attributes": { 
+            name: typeof comp === 'object' && 'name' in comp ? comp.name : "Unknown",
+            unit: "%" 
+          } 
+        };
+      }
+      
+      return comp;
+    });
     
     // Combine all data needed for the label with fallbacks for missing values
     return {
-      productName: labelInfo.ProductName || metadata.Name || "Unnamed Product",
-      manufacturer: labelInfo.Manufacturer || "Unknown Manufacturer",
-      address: labelInfo.ManufacturerAddress || "Address not specified",
-      registrationNumber: labelInfo.RegistrationNumber || "No registration number",
-      category: metadata.Category || "Uncategorized",
-      subCategory: metadata.SubCategory || "",
-      ingredients: ingredientsList,
-      guaranteedAnalysis: components,
-      storageInstructions: labelInfo.StorageInstructions || "Store in cool, dry place",
-      shelfLife: typeof shelfLife === 'object' ? `${shelfLife["#text"] || "Not specified"} ${shelfLifeUnit}` : `${shelfLife} ${shelfLifeUnit}`,
+      productName: labelInfo?.ProductName || metadata?.Name || "Unnamed Product",
+      manufacturer: labelInfo?.Manufacturer || "Unknown Manufacturer",
+      address: labelInfo?.ManufacturerAddress || "Address not specified",
+      registrationNumber: labelInfo?.RegistrationNumber || "No registration number",
+      category: metadata?.Category || "Uncategorized",
+      subCategory: metadata?.SubCategory || "",
+      ingredients: ingredients || [],
+      guaranteedAnalysis: safeCheckComponents,
+      storageInstructions: labelInfo?.StorageInstructions || "Store in cool, dry place",
+      shelfLife: `${shelfLifeValue} ${shelfLifeUnit}`,
       feedingDirections: {
-        animalType: feedingDirections.AnimalType || "Not specified",
-        animalAge: typeof animalAge === 'object' ? `${animalAge["#text"] || "Not specified"} ${ageUnit}` : `${animalAge} ${ageUnit}`,
-        dailyAmount: feedingDirections.DailyAmount || "As directed by nutritionist",
-        specialInstructions: feedingDirections.SpecialInstructions || "No special instructions"
+        animalType: feedingDirections?.AnimalType || "Not specified",
+        animalAge: `${ageValue} ${ageUnit}`,
+        dailyAmount: feedingDirections?.DailyAmount || "As directed by nutritionist",
+        specialInstructions: feedingDirections?.SpecialInstructions || "No special instructions"
       }
     };
   } catch (error) {
     console.error("Error extracting label data:", error);
-    throw new Error("Failed to extract label data from XML");
+    // Return a safe default object in case of errors
+    return {
+      productName: "Error processing data",
+      manufacturer: "Unknown",
+      address: "Unknown",
+      registrationNumber: "Unknown",
+      category: "Error",
+      subCategory: "",
+      ingredients: ["Error processing ingredients"],
+      guaranteedAnalysis: [],
+      storageInstructions: "Not available",
+      shelfLife: "Not available",
+      feedingDirections: {
+        animalType: "Not available",
+        animalAge: "Not available",
+        dailyAmount: "Not available",
+        specialInstructions: "Not available"
+      }
+    };
   }
 };
 

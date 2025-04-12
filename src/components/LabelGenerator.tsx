@@ -67,21 +67,22 @@ REGISTRATION: ${labelData.registrationNumber}
 CATEGORY: ${labelData.category} - ${labelData.subCategory}
 
 GUARANTEED ANALYSIS:
-${labelData.guaranteedAnalysis.map((comp: any) => 
-  `- ${comp["@attributes"]?.name || "Unknown"}: ${comp["@attributes"]?.minimum ? `Min ${comp["@attributes"].minimum}` : ""} ${comp["@attributes"]?.maximum ? `Max ${comp["@attributes"].maximum}` : ""} ${comp["@attributes"]?.unit || ""}`
-).join('\n')}
+${(labelData.guaranteedAnalysis || []).map((comp: any) => {
+  const attrs = comp["@attributes"] || {};
+  return `- ${attrs.name || "Unknown"}: ${attrs.minimum ? `Min ${attrs.minimum}` : ""} ${attrs.maximum ? `Max ${attrs.maximum}` : ""} ${attrs.unit || ""}`;
+}).join('\n')}
 
 INGREDIENTS:
-${labelData.ingredients.join(', ')}
+${(labelData.ingredients || []).join(', ')}
 
 FEEDING DIRECTIONS:
-Animal Type: ${labelData.feedingDirections.animalType}
-Animal Age: ${labelData.feedingDirections.animalAge}
-Daily Amount: ${labelData.feedingDirections.dailyAmount}
-Special Instructions: ${labelData.feedingDirections.specialInstructions}
+Animal Type: ${labelData.feedingDirections?.animalType || "Not specified"}
+Animal Age: ${labelData.feedingDirections?.animalAge || "Not specified"}
+Daily Amount: ${labelData.feedingDirections?.dailyAmount || "Not specified"}
+Special Instructions: ${labelData.feedingDirections?.specialInstructions || "Not specified"}
 
-STORAGE: ${labelData.storageInstructions}
-SHELF LIFE: ${labelData.shelfLife}
+STORAGE: ${labelData.storageInstructions || "Not specified"}
+SHELF LIFE: ${labelData.shelfLife || "Not specified"}
 
 Generated on: ${new Date().toLocaleString()}
       `;
@@ -91,7 +92,7 @@ Generated on: ${new Date().toLocaleString()}
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${labelData.productName.replace(/\s+/g, '_')}_Label.txt`;
+      link.download = `${(labelData.productName || "Ration_Label").replace(/\s+/g, '_')}_Label.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -136,6 +137,11 @@ Generated on: ${new Date().toLocaleString()}
     );
   }
 
+  // Safely access guaranteedAnalysis with defensive checks
+  const safeGuaranteedAnalysis = Array.isArray(labelData.guaranteedAnalysis) 
+    ? labelData.guaranteedAnalysis 
+    : [];
+
   return (
     <Card className="shadow-sm">
       <CardHeader>
@@ -167,18 +173,21 @@ Generated on: ${new Date().toLocaleString()}
                   <h3 className="font-bold text-lg border-b mb-2">Guaranteed Analysis</h3>
                   <table className="w-full text-sm">
                     <tbody>
-                      {labelData.guaranteedAnalysis.map((comp: any, idx: number) => (
-                        <tr key={idx} className="border-b">
-                          <td className="py-1 font-medium">{comp["@attributes"]?.name || "Unknown"}</td>
-                          <td className="py-1 text-right">
-                            {comp["@attributes"]?.minimum && `Min ${comp["@attributes"].minimum}`}
-                            {comp["@attributes"]?.minimum && comp["@attributes"]?.maximum && ", "}
-                            {comp["@attributes"]?.maximum && `Max ${comp["@attributes"].maximum}`}
-                            {" "}
-                            {comp["@attributes"]?.unit || ""}
-                          </td>
-                        </tr>
-                      ))}
+                      {safeGuaranteedAnalysis.map((comp: any, idx: number) => {
+                        const attrs = comp["@attributes"] || {};
+                        return (
+                          <tr key={idx} className="border-b">
+                            <td className="py-1 font-medium">{attrs.name || "Unknown"}</td>
+                            <td className="py-1 text-right">
+                              {attrs.minimum && `Min ${attrs.minimum}`}
+                              {attrs.minimum && attrs.maximum && ", "}
+                              {attrs.maximum && `Max ${attrs.maximum}`}
+                              {" "}
+                              {attrs.unit || ""}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -187,16 +196,16 @@ Generated on: ${new Date().toLocaleString()}
                   <h3 className="font-bold text-lg border-b mb-2">Feeding Directions</h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="font-medium">Animal Type:</span> {labelData.feedingDirections.animalType}
+                      <span className="font-medium">Animal Type:</span> {labelData.feedingDirections?.animalType || "Not specified"}
                     </div>
                     <div>
-                      <span className="font-medium">Animal Age:</span> {labelData.feedingDirections.animalAge}
+                      <span className="font-medium">Animal Age:</span> {labelData.feedingDirections?.animalAge || "Not specified"}
                     </div>
                     <div>
-                      <span className="font-medium">Daily Amount:</span> {labelData.feedingDirections.dailyAmount}
+                      <span className="font-medium">Daily Amount:</span> {labelData.feedingDirections?.dailyAmount || "Not specified"}
                     </div>
                     <div>
-                      <span className="font-medium">Special Instructions:</span> {labelData.feedingDirections.specialInstructions}
+                      <span className="font-medium">Special Instructions:</span> {labelData.feedingDirections?.specialInstructions || "Not specified"}
                     </div>
                   </div>
                 </div>
@@ -204,25 +213,25 @@ Generated on: ${new Date().toLocaleString()}
               
               <div className="mb-4">
                 <h3 className="font-bold text-lg border-b mb-2">Ingredients</h3>
-                <p className="text-sm">{labelData.ingredients.join(', ')}</p>
+                <p className="text-sm">{(labelData.ingredients || []).join(', ')}</p>
               </div>
               
               <div className="mb-4">
                 <h3 className="font-bold text-lg border-b mb-2">Storage & Handling</h3>
                 <div className="text-sm space-y-2">
-                  <div>{labelData.storageInstructions}</div>
-                  <div><span className="font-medium">Shelf Life:</span> {labelData.shelfLife}</div>
+                  <div>{labelData.storageInstructions || "Not specified"}</div>
+                  <div><span className="font-medium">Shelf Life:</span> {labelData.shelfLife || "Not specified"}</div>
                 </div>
               </div>
               
               <div className="border-t-2 border-black pt-2 text-xs">
                 <div className="flex flex-wrap justify-between">
                   <div>
-                    <div><strong>{labelData.manufacturer}</strong></div>
-                    <div>{labelData.address}</div>
+                    <div><strong>{labelData.manufacturer || "Unknown Manufacturer"}</strong></div>
+                    <div>{labelData.address || "Address not specified"}</div>
                   </div>
                   <div className="text-right">
-                    <div>Registration: {labelData.registrationNumber}</div>
+                    <div>Registration: {labelData.registrationNumber || "Not specified"}</div>
                     <div>Batch: [BATCH NUMBER HERE]</div>
                     <div>Production Date: {new Date().toLocaleDateString()}</div>
                   </div>
