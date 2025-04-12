@@ -162,9 +162,9 @@ Generated on: ${new Date().toLocaleString()}
               className="rounded-md border-2 border-dashed p-8 bg-white mx-auto w-full max-w-[680px]"
             >
               <div className="text-center border-b-2 border-black pb-2 mb-4">
-                <h2 className="text-3xl font-bold mb-1">{labelData.productName}</h2>
+                <h2 className="text-3xl font-bold mb-1">{labelData.productName || "Unnamed Product"}</h2>
                 <div className="text-sm text-muted-foreground">
-                  {labelData.category} - {labelData.subCategory}
+                  {labelData.category || "Uncategorized"} - {labelData.subCategory || ""}
                 </div>
               </div>
               
@@ -196,16 +196,16 @@ Generated on: ${new Date().toLocaleString()}
                   <h3 className="font-bold text-lg border-b mb-2">Feeding Directions</h3>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <span className="font-medium">Animal Type:</span> {labelData.feedingDirections?.animalType || "Not specified"}
+                      <span className="font-medium">Animal Type:</span> {String(labelData.feedingDirections?.animalType || "Not specified")}
                     </div>
                     <div>
-                      <span className="font-medium">Animal Age:</span> {labelData.feedingDirections?.animalAge || "Not specified"}
+                      <span className="font-medium">Animal Age:</span> {String(labelData.feedingDirections?.animalAge || "Not specified")}
                     </div>
                     <div>
-                      <span className="font-medium">Daily Amount:</span> {labelData.feedingDirections?.dailyAmount || "Not specified"}
+                      <span className="font-medium">Daily Amount:</span> {String(labelData.feedingDirections?.dailyAmount || "Not specified")}
                     </div>
                     <div>
-                      <span className="font-medium">Special Instructions:</span> {labelData.feedingDirections?.specialInstructions || "Not specified"}
+                      <span className="font-medium">Special Instructions:</span> {String(labelData.feedingDirections?.specialInstructions || "Not specified")}
                     </div>
                   </div>
                 </div>
@@ -213,25 +213,27 @@ Generated on: ${new Date().toLocaleString()}
               
               <div className="mb-4">
                 <h3 className="font-bold text-lg border-b mb-2">Ingredients</h3>
-                <p className="text-sm">{(labelData.ingredients || []).join(', ')}</p>
+                <p className="text-sm">{Array.isArray(labelData.ingredients) 
+                  ? labelData.ingredients.join(', ') 
+                  : String(labelData.ingredients || "Not specified")}</p>
               </div>
               
               <div className="mb-4">
                 <h3 className="font-bold text-lg border-b mb-2">Storage & Handling</h3>
                 <div className="text-sm space-y-2">
-                  <div>{labelData.storageInstructions || "Not specified"}</div>
-                  <div><span className="font-medium">Shelf Life:</span> {labelData.shelfLife || "Not specified"}</div>
+                  <div>{String(labelData.storageInstructions || "Not specified")}</div>
+                  <div><span className="font-medium">Shelf Life:</span> {String(labelData.shelfLife || "Not specified")}</div>
                 </div>
               </div>
               
               <div className="border-t-2 border-black pt-2 text-xs">
                 <div className="flex flex-wrap justify-between">
                   <div>
-                    <div><strong>{labelData.manufacturer || "Unknown Manufacturer"}</strong></div>
-                    <div>{labelData.address || "Address not specified"}</div>
+                    <div><strong>{String(labelData.manufacturer || "Unknown Manufacturer")}</strong></div>
+                    <div>{String(labelData.address || "Address not specified")}</div>
                   </div>
                   <div className="text-right">
-                    <div>Registration: {labelData.registrationNumber || "Not specified"}</div>
+                    <div>Registration: {String(labelData.registrationNumber || "Not specified")}</div>
                     <div>Batch: [BATCH NUMBER HERE]</div>
                     <div>Production Date: {new Date().toLocaleDateString()}</div>
                   </div>
