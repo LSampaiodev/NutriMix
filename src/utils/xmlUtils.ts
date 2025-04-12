@@ -453,36 +453,55 @@ export const extractLabelData = (xmlObj: any): any => {
     const formula = xmlObj;
     
     // Extract basic information
-    const metadata = formula.Metadata;
-    const labelInfo = formula.LabelingInformation;
-    const nutritionalProfile = formula.NutritionalProfile;
-    const guaranteedAnalysis = labelInfo.GuaranteedAnalysis;
+    const metadata = formula.Metadata || {};
+    const labelInfo = formula.LabelingInformation || {};
+    const nutritionalProfile = formula.NutritionalProfile || {};
     
-    // Extract ingredients list
-    const ingredients = formula.Ingredients.Ingredient;
+    // Handle potentially missing guaranteedAnalysis
+    const guaranteedAnalysis = labelInfo.GuaranteedAnalysis || {};
+    const guaranteedComponents = guaranteedAnalysis.Component || [];
+    
+    // Ensure guaranteedAnalysis.Component is always an array
+    const components = Array.isArray(guaranteedComponents) 
+      ? guaranteedComponents 
+      : guaranteedComponents ? [guaranteedComponents] : [];
+    
+    // Extract ingredients list safely
+    const ingredients = formula.Ingredients?.Ingredient || [];
     const ingredientsList = Array.isArray(ingredients) 
-      ? ingredients.map((ing: any) => ing.Name) 
-      : [ingredients.Name];
+      ? ingredients.map((ing: any) => ing.Name || "Unknown Ingredient") 
+      : ingredients?.Name ? [ingredients.Name] : ["No ingredients specified"];
     
-    // Combine all data needed for the label
+    // Safely extract feeding directions
+    const feedingDirections = labelInfo.FeedingDirections || {};
+    
+    // Handle attributes safely with default values
+    const animalAge = feedingDirections.AnimalAge || "Not specified";
+    const ageUnit = animalAge["@attributes"]?.unit || "";
+    
+    // Safely get shelf life and its unit
+    const shelfLife = labelInfo.ShelfLife || "Not specified";
+    const shelfLifeUnit = (typeof shelfLife === 'object' && shelfLife["@attributes"]) 
+      ? shelfLife["@attributes"].unit || ""
+      : "months";
+    
+    // Combine all data needed for the label with fallbacks for missing values
     return {
-      productName: labelInfo.ProductName,
-      manufacturer: labelInfo.Manufacturer,
-      address: labelInfo.ManufacturerAddress,
-      registrationNumber: labelInfo.RegistrationNumber,
-      category: metadata.Category,
-      subCategory: metadata.SubCategory,
+      productName: labelInfo.ProductName || metadata.Name || "Unnamed Product",
+      manufacturer: labelInfo.Manufacturer || "Unknown Manufacturer",
+      address: labelInfo.ManufacturerAddress || "Address not specified",
+      registrationNumber: labelInfo.RegistrationNumber || "No registration number",
+      category: metadata.Category || "Uncategorized",
+      subCategory: metadata.SubCategory || "",
       ingredients: ingredientsList,
-      guaranteedAnalysis: Array.isArray(guaranteedAnalysis.Component) 
-        ? guaranteedAnalysis.Component 
-        : [guaranteedAnalysis.Component],
-      storageInstructions: labelInfo.StorageInstructions,
-      shelfLife: `${labelInfo.ShelfLife} ${labelInfo.ShelfLife["@attributes"]?.unit || "months"}`,
+      guaranteedAnalysis: components,
+      storageInstructions: labelInfo.StorageInstructions || "Store in cool, dry place",
+      shelfLife: typeof shelfLife === 'object' ? `${shelfLife["#text"] || "Not specified"} ${shelfLifeUnit}` : `${shelfLife} ${shelfLifeUnit}`,
       feedingDirections: {
-        animalType: labelInfo.FeedingDirections.AnimalType,
-        animalAge: `${labelInfo.FeedingDirections.AnimalAge} ${labelInfo.FeedingDirections.AnimalAge["@attributes"]?.unit || ""}`,
-        dailyAmount: labelInfo.FeedingDirections.DailyAmount,
-        specialInstructions: labelInfo.FeedingDirections.SpecialInstructions
+        animalType: feedingDirections.AnimalType || "Not specified",
+        animalAge: typeof animalAge === 'object' ? `${animalAge["#text"] || "Not specified"} ${ageUnit}` : `${animalAge} ${ageUnit}`,
+        dailyAmount: feedingDirections.DailyAmount || "As directed by nutritionist",
+        specialInstructions: feedingDirections.SpecialInstructions || "No special instructions"
       }
     };
   } catch (error) {

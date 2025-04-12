@@ -68,7 +68,7 @@ CATEGORY: ${labelData.category} - ${labelData.subCategory}
 
 GUARANTEED ANALYSIS:
 ${labelData.guaranteedAnalysis.map((comp: any) => 
-  `- ${comp["@attributes"].name}: ${comp["@attributes"].minimum ? `Min ${comp["@attributes"].minimum}` : ""} ${comp["@attributes"].maximum ? `Max ${comp["@attributes"].maximum}` : ""} ${comp["@attributes"].unit}`
+  `- ${comp["@attributes"]?.name || "Unknown"}: ${comp["@attributes"]?.minimum ? `Min ${comp["@attributes"].minimum}` : ""} ${comp["@attributes"]?.maximum ? `Max ${comp["@attributes"].maximum}` : ""} ${comp["@attributes"]?.unit || ""}`
 ).join('\n')}
 
 INGREDIENTS:
@@ -169,13 +169,13 @@ Generated on: ${new Date().toLocaleString()}
                     <tbody>
                       {labelData.guaranteedAnalysis.map((comp: any, idx: number) => (
                         <tr key={idx} className="border-b">
-                          <td className="py-1 font-medium">{comp["@attributes"].name}</td>
+                          <td className="py-1 font-medium">{comp["@attributes"]?.name || "Unknown"}</td>
                           <td className="py-1 text-right">
-                            {comp["@attributes"].minimum && `Min ${comp["@attributes"].minimum}`}
-                            {comp["@attributes"].minimum && comp["@attributes"].maximum && ", "}
-                            {comp["@attributes"].maximum && `Max ${comp["@attributes"].maximum}`}
+                            {comp["@attributes"]?.minimum && `Min ${comp["@attributes"].minimum}`}
+                            {comp["@attributes"]?.minimum && comp["@attributes"]?.maximum && ", "}
+                            {comp["@attributes"]?.maximum && `Max ${comp["@attributes"].maximum}`}
                             {" "}
-                            {comp["@attributes"].unit}
+                            {comp["@attributes"]?.unit || ""}
                           </td>
                         </tr>
                       ))}
