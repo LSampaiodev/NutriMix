@@ -1,73 +1,115 @@
-# Welcome to your Lovable project
+# TagTwo - Sistema de Gerenciamento de Ração
 
-## Project info
+Um sistema moderno para gerenciamento de fórmulas de ração, geração de labels e visualização de dados XML.
 
-**URL**: https://lovable.dev/projects/de42803b-4b24-4c49-a20a-47ee3e30c3f7
+## 🚀 Características
 
-## How can I edit this code?
+- **Upload e Processamento de XML**: Carregue e processe arquivos XML de fórmulas de ração
+- **Geração de Labels**: Crie labels personalizados para produtos
+- **Dashboard Interativo**: Visualize estatísticas e dados em tempo real
+- **Interface Responsiva**: Design moderno e adaptável para diferentes dispositivos
+- **Autenticação Segura**: Sistema de login com JWT
+- **Arquitetura Limpa**: Seguindo princípios SOLID e padrão MVC
 
-There are several ways of editing your application.
+## 🛠️ Tecnologias
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript
+- **UI Components**: Radix UI + Shadcn/ui
+- **Styling**: Tailwind CSS
+- **State Management**: TanStack Query
+- **Routing**: React Router DOM
+- **Forms**: React Hook Form + Zod
+- **Build Tool**: Vite
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/de42803b-4b24-4c49-a20a-47ee3e30c3f7) and start prompting.
+## 📁 Estrutura do Projeto
 
-Changes made via Lovable will be committed automatically to this repo.
+```
+src/
+├── core/                 # Camada de domínio (Model)
+│   ├── entities/        # Entidades de negócio
+│   ├── repositories/    # Interfaces de repositórios
+│   └── services/        # Serviços de domínio
+├── infrastructure/      # Camada de infraestrutura
+│   ├── api/            # Cliente HTTP e APIs
+│   ├── storage/        # Gerenciamento de estado local
+│   └── adapters/       # Adaptadores para serviços externos
+├── presentation/        # Camada de apresentação (View + Controller)
+│   ├── components/     # Componentes React reutilizáveis
+│   ├── pages/          # Páginas da aplicação
+│   ├── hooks/          # Custom hooks
+│   └── layouts/        # Layouts da aplicação
+├── shared/             # Código compartilhado
+│   ├── types/          # Tipos TypeScript
+│   ├── constants/      # Constantes da aplicação
+│   └── utils/          # Utilitários
+└── main.tsx           # Ponto de entrada
+```
 
-**Use your preferred IDE**
+## 🚀 Como Executar
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Pré-requisitos
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js 18+ 
+- npm ou yarn
 
-Follow these steps:
+### Instalação
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone o repositório:
+```bash
+git clone <repository-url>
+cd TagTwo
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Instale as dependências:
+```bash
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Execute o projeto em modo de desenvolvimento:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Acesse `http://localhost:5173` no seu navegador
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Scripts Disponíveis
 
-**Use GitHub Codespaces**
+- `npm run dev` - Inicia o servidor de desenvolvimento
+- `npm run build` - Gera build de produção
+- `npm run build:dev` - Gera build de desenvolvimento
+- `npm run lint` - Executa o linter
+- `npm run preview` - Visualiza o build de produção
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🏗️ Arquitetura
 
-## What technologies are used for this project?
+O projeto segue os princípios SOLID e o padrão MVC:
 
-This project is built with:
+### **Model (Domínio)**
+- `core/entities/` - Entidades de negócio
+- `core/services/` - Lógica de negócio
+- `core/repositories/` - Interfaces de acesso a dados
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### **View (Apresentação)**
+- `presentation/components/` - Componentes React
+- `presentation/pages/` - Páginas da aplicação
+- `presentation/layouts/` - Layouts
 
-## How can I deploy this project?
+### **Controller (Controle)**
+- `presentation/hooks/` - Custom hooks para lógica de controle
+- `infrastructure/api/` - Controllers para APIs
 
-Simply open [Lovable](https://lovable.dev/projects/de42803b-4b24-4c49-a20a-47ee3e30c3f7) and click on Share -> Publish.
+## 📝 Contribuindo
 
-## Can I connect a custom domain to my Lovable project?
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-Yes it is!
+## 📄 Licença
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🤝 Suporte
+
+Para suporte, envie um email para suporte@tagtwo.com ou abra uma issue no repositório.
