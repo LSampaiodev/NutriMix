@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/pre
 import { Button } from "@/presentation/components/components/ui/button";
 import { Printer, Download, FileText, RefreshCw } from "lucide-react";
 import { useReactToPrint } from 'react-to-print';
-import { extractLabelData } from "@/utils/xmlUtils";
-import { logAuditEvent } from "@/utils/auth";
+import { extractLabelData } from "@/core/services/xmlUtils";
+import { logAuditEvent } from "@/infrastructure/api/auth";
 import { toast } from "sonner";
 
 interface LabelGeneratorProps {

@@ -2,19 +2,14 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/presentation/components/components/ui/button";
 import { Input } from "@/presentation/components/components/ui/input";
 import { Label } from "@/presentation/components/components/ui/label";
-
-import React, { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/presentation/components/components/ui/card";
+import { Alert, AlertDescription } from "@/presentation/components/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/components/ui/select";
 import { FileUp, FileQuestion, Check, AlertCircle } from "lucide-react";
-import { parseXML, validateXmlSecurity, saveProcessedXml, getSampleXmlData } from "@/utils/xmlUtils";
-import { xmlUploadSchema, validateData } from "@/utils/validation";
-import { Progress } from "@/components/ui/progress";
-import { logAuditEvent } from "@/utils/auth";
+import { parseXML, validateXmlSecurity, saveProcessedXml, getSampleXmlData } from "@/core/services/xmlUtils";
+import { xmlUploadSchema, validateData } from "@/core/services/validation";
+import { Progress } from "@/presentation/components/components/ui/progress";
+import { logAuditEvent } from "@/infrastructure/api/auth";
 import { toast } from "sonner";
 
 interface XmlUploaderProps {
