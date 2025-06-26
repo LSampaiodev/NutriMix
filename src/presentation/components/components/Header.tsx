@@ -22,7 +22,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     logAuditEvent("logout", { username: user?.username });
     logout();
-    toast.success("Logged out successfully");
+    toast.success("Logout realizado com sucesso");
   };
   
   const getInitials = (name: string) => {
@@ -40,7 +40,7 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Link to="/dashboard" className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold text-primary">RationGuard</span>
+              <span className="text-xl font-bold text-primary">TagTwo</span>
             </Link>
             
             <div className="hidden md:flex items-center ml-8 space-x-1">
@@ -57,7 +57,7 @@ const Header: React.FC = () => {
                   variant={location.pathname === "/labels" ? "default" : "ghost"}
                   size="sm"
                 >
-                  Labels
+                  Etiquetas
                 </Button>
               </Link>
               {user?.role === "admin" && (
@@ -66,7 +66,7 @@ const Header: React.FC = () => {
                     variant={location.pathname === "/users" ? "default" : "ghost"}
                     size="sm"
                   >
-                    Users
+                    Usuários
                   </Button>
                 </Link>
               )}
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
                   variant={location.pathname === "/logs" ? "default" : "ghost"}
                   size="sm"
                 >
-                  Audit Logs
+                  Auditoria
                 </Button>
               </Link>
             </div>
@@ -102,20 +102,20 @@ const Header: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer">
                   <UserIcon className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>Perfil</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <span>Configurações</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-ration-danger">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>Sair</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
