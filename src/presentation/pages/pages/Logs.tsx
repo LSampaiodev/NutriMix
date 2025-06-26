@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/infrastructure/api/auth";
 import Header from "@/presentation/components/components/Header";
-import Sidebar, { SidebarToggle } from "@/presentation/components/components/Sidebar";
+import SidebarContent from "@/presentation/components/components/Sidebar";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarTrigger,
+  SidebarHamburgerTrigger
+} from "@/presentation/components/components/ui/sidebar";
 import { Button } from "@/presentation/components/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/components/ui/card";
 import { Input } from "@/presentation/components/components/ui/input";
@@ -105,7 +111,6 @@ const SAMPLE_LOGS: AuditLog[] = [
 
 const Logs = () => {
   const { isAuthenticated } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAction, setFilterAction] = useState("all");
   const [filterUser, setFilterUser] = useState("all");
@@ -148,10 +153,6 @@ const Logs = () => {
     
     setLogs(combinedLogs);
   }, []);
-  
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
   
   // Helper function to determine log level based on action
   function getLogLevel(action: string): "info" | "warning" | "error" | "critical" {
@@ -223,244 +224,242 @@ const Logs = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">Audit Logs</h1>
-              <p className="text-muted-foreground">
-                Track and monitor system activity and security events
-              </p>
+    <SidebarProvider>
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar>
+          <SidebarContent />
+        </Sidebar>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header />
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-bold">Logs de Auditoria</h1>
+                <p className="text-muted-foreground">
+                  Visualize e filtre os eventos do sistema
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <SidebarHamburgerTrigger />
+                <SidebarTrigger />
+              </div>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <SidebarToggle toggleSidebar={toggleSidebar} />
-              <Button variant="outline" onClick={() => window.location.reload()}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <div className="col-span-1 md:col-span-2 lg:col-span-3">
-              <Card>
-                <CardHeader>
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                      <CardTitle>System Activity</CardTitle>
-                      <CardDescription>
-                        Comprehensive audit trail of system events and user actions
-                      </CardDescription>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="col-span-1 md:col-span-2 lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <CardTitle>Atividade do Sistema</CardTitle>
+                        <CardDescription>
+                          Rastreio detalhado de eventos do sistema e ações dos usuários
+                        </CardDescription>
+                      </div>
+                      
+                      <div className="relative">
+                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search logs..."
+                          className="pl-9 w-full md:w-64"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
                     </div>
                     
-                    <div className="relative">
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search logs..."
-                        className="pl-9 w-full md:w-64"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+                    <div className="flex flex-wrap gap-3 mt-4">
+                      <div className="flex items-center space-x-2">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Filtros:</span>
+                      </div>
+                      
+                      <Select value={filterAction} onValueChange={setFilterAction}>
+                        <SelectTrigger className="h-8 w-auto">
+                          <SelectValue placeholder="Action Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueActions.map(action => (
+                            <SelectItem key={action} value={action}>
+                              {action === "all" ? "All Actions" : action.replace(/_/g, ' ')}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select value={filterUser} onValueChange={setFilterUser}>
+                        <SelectTrigger className="h-8 w-auto">
+                          <SelectValue placeholder="User" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueUsers.map(user => (
+                            <SelectItem key={user} value={user}>
+                              {user === "all" ? "All Users" : user}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select value={filterLevel} onValueChange={setFilterLevel}>
+                        <SelectTrigger className="h-8 w-auto">
+                          <SelectValue placeholder="Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os Níveis</SelectItem>
+                          <SelectItem value="info">Info</SelectItem>
+                          <SelectItem value="warning">Aviso</SelectItem>
+                          <SelectItem value="error">Erro</SelectItem>
+                          <SelectItem value="critical">Crítico</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        setSearchTerm("");
+                        setFilterAction("all");
+                        setFilterUser("all");
+                        setFilterLevel("all");
+                      }}>
+                        Limpar Filtros
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-3 mt-4">
-                    <div className="flex items-center space-x-2">
-                      <Filter className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Filters:</span>
-                    </div>
-                    
-                    <Select value={filterAction} onValueChange={setFilterAction}>
-                      <SelectTrigger className="h-8 w-auto">
-                        <SelectValue placeholder="Action Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {uniqueActions.map(action => (
-                          <SelectItem key={action} value={action}>
-                            {action === "all" ? "All Actions" : action.replace(/_/g, ' ')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <Select value={filterUser} onValueChange={setFilterUser}>
-                      <SelectTrigger className="h-8 w-auto">
-                        <SelectValue placeholder="User" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {uniqueUsers.map(user => (
-                          <SelectItem key={user} value={user}>
-                            {user === "all" ? "All Users" : user}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <Select value={filterLevel} onValueChange={setFilterLevel}>
-                      <SelectTrigger className="h-8 w-auto">
-                        <SelectValue placeholder="Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="info">Info</SelectItem>
-                        <SelectItem value="warning">Warning</SelectItem>
-                        <SelectItem value="error">Error</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    
-                    <Button variant="ghost" size="sm" onClick={() => {
-                      setSearchTerm("");
-                      setFilterAction("all");
-                      setFilterUser("all");
-                      setFilterLevel("all");
-                    }}>
-                      Clear Filters
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>User</TableHead>
-                        <TableHead>Action</TableHead>
-                        <TableHead>Level</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLogs.length > 0 ? (
-                        filteredLogs.map((log) => (
-                          <TableRow 
-                            key={log.id} 
-                            className="cursor-pointer hover:bg-muted/50"
-                            onClick={() => setSelectedLog(log)}
-                          >
-                            <TableCell className="whitespace-nowrap">
-                              {new Date(log.timestamp).toLocaleString()}
-                            </TableCell>
-                            <TableCell>{log.user}</TableCell>
-                            <TableCell className="flex items-center">
-                              <span className="mr-2">
-                                {getActionIcon(log.action)}
-                              </span>
-                              {log.action.replace(/_/g, ' ')}
-                            </TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant="outline" 
-                                className={getLevelBadgeClass(log.level)}
-                              >
-                                {log.level}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="truncate max-w-[150px]">
-                              {log.details && Object.keys(log.details).length > 0 
-                                ? JSON.stringify(log.details).substring(0, 30) + "..." 
-                                : "No details"}
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Timestamp</TableHead>
+                          <TableHead>Usuário</TableHead>
+                          <TableHead>Ação</TableHead>
+                          <TableHead>Nível</TableHead>
+                          <TableHead>Detalhes</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredLogs.length > 0 ? (
+                          filteredLogs.map((log) => (
+                            <TableRow 
+                              key={log.id} 
+                              className="cursor-pointer hover:bg-muted/50"
+                              onClick={() => setSelectedLog(log)}
+                            >
+                              <TableCell className="whitespace-nowrap">
+                                {new Date(log.timestamp).toLocaleString()}
+                              </TableCell>
+                              <TableCell>{log.user}</TableCell>
+                              <TableCell className="flex items-center">
+                                <span className="mr-2">
+                                  {getActionIcon(log.action)}
+                                </span>
+                                {log.action.replace(/_/g, ' ')}
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant="outline" 
+                                  className={getLevelBadgeClass(log.level)}
+                                >
+                                  {log.level}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="truncate max-w-[150px]">
+                                {log.details && Object.keys(log.details).length > 0 
+                                  ? JSON.stringify(log.details).substring(0, 30) + "..." 
+                                  : "No details"}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        ) : (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                              {logs.length === 0 
+                                ? "No audit logs available."
+                                : "No matching logs found."}
                             </TableCell>
                           </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                            {logs.length === 0 
-                              ? "No audit logs available."
-                              : "No matching logs found."}
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="col-span-1">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle>Log Details</CardTitle>
-                  <CardDescription>
-                    {selectedLog 
-                      ? `Details for log #${selectedLog.id}` 
-                      : "Select a log to view details"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {selectedLog ? (
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Timestamp</h3>
-                        <p>{new Date(selectedLog.timestamp).toLocaleString()}</p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">User</h3>
-                        <div className="flex items-center">
-                          <Badge variant="outline" className="mr-2">
-                            ID: {selectedLog.userId}
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="col-span-1">
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle>Detalhes do Log</CardTitle>
+                    <CardDescription>
+                      {selectedLog 
+                        ? `Details for log #${selectedLog.id}` 
+                        : "Select a log to view details"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {selectedLog ? (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Timestamp</h3>
+                          <p>{new Date(selectedLog.timestamp).toLocaleString()}</p>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Usuário</h3>
+                          <div className="flex items-center">
+                            <Badge variant="outline" className="mr-2">
+                              ID: {selectedLog.userId}
+                            </Badge>
+                            <span>{selectedLog.user}</span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Ação</h3>
+                          <div className="flex items-center">
+                            {getActionIcon(selectedLog.action)}
+                            <span className="ml-2">{selectedLog.action.replace(/_/g, ' ')}</span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Nível</h3>
+                          <Badge 
+                            variant="outline" 
+                            className={getLevelBadgeClass(selectedLog.level)}
+                          >
+                            {selectedLog.level}
                           </Badge>
-                          <span>{selectedLog.user}</span>
+                        </div>
+                        
+                        <Separator />
+                        
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Detalhes</h3>
+                          <ScrollArea className="h-[240px] border rounded-md p-4">
+                            <pre className="text-xs whitespace-pre-wrap">
+                              {JSON.stringify(selectedLog.details, null, 2)}
+                            </pre>
+                          </ScrollArea>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-2 mt-4">
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export
+                          </Button>
                         </div>
                       </div>
-                      
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Action</h3>
-                        <div className="flex items-center">
-                          {getActionIcon(selectedLog.action)}
-                          <span className="ml-2">{selectedLog.action.replace(/_/g, ' ')}</span>
-                        </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+                        <Clock className="h-12 w-12 mb-4 opacity-50" />
+                        <p>Selecione um log para visualizar os detalhes</p>
                       </div>
-                      
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Level</h3>
-                        <Badge 
-                          variant="outline" 
-                          className={getLevelBadgeClass(selectedLog.level)}
-                        >
-                          {selectedLog.level}
-                        </Badge>
-                      </div>
-                      
-                      <Separator />
-                      
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Details</h3>
-                        <ScrollArea className="h-[240px] border rounded-md p-4">
-                          <pre className="text-xs whitespace-pre-wrap">
-                            {JSON.stringify(selectedLog.details, null, 2)}
-                          </pre>
-                        </ScrollArea>
-                      </div>
-                      
-                      <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-2" />
-                          Export
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-                      <Clock className="h-12 w-12 mb-4 opacity-50" />
-                      <p>Select a log entry to view details</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

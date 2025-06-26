@@ -131,18 +131,18 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
           <CardTitle>XML Viewer</CardTitle>
         </div>
         <CardDescription>
-          Detailed view of the ration formula XML data
+          Visualização detalhada dos dados XML da fórmula de ração
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview">
           <TabsList className="w-full grid grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
-            <TabsTrigger value="nutritional">Nutritional</TabsTrigger>
-            <TabsTrigger value="labeling">Labeling</TabsTrigger>
-            <TabsTrigger value="processing">Processing</TabsTrigger>
-            {rawXml && <TabsTrigger value="raw">Raw XML</TabsTrigger>}
+            <TabsTrigger value="nutritional">Nutricional</TabsTrigger>
+            <TabsTrigger value="labeling">Etiquetagem</TabsTrigger>
+            <TabsTrigger value="processing">Processamento</TabsTrigger>
+            {rawXml && <TabsTrigger value="raw">XML Bruto</TabsTrigger>}
           </TabsList>
           
           <TabsContent value="overview" className="p-4">
@@ -152,7 +152,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Category</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Categoria</h4>
                     <p>{formulaMetadata.category} - {formulaMetadata.subCategory}</p>
                   </div>
                   
@@ -162,22 +162,22 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Created By</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Criado Por</h4>
                     <p>{formulaMetadata.createdBy}</p>
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Batch Size</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Tamanho do Lote</h4>
                     <p>{formulaMetadata.batchSize}</p>
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Creation Date</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Data de Criação</h4>
                     <p>{formulaMetadata.creationDate}</p>
                   </div>
                   
                   <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Last Modified</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground">Última Modificação</h4>
                     <p>{formulaMetadata.lastModified}</p>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 <Separator />
                 
                 <div>
-                  <h4 className="text-lg font-medium mb-2">Ingredients Summary</h4>
+                  <h4 className="text-lg font-medium mb-2">Ingredientes</h4>
                   <div className="grid grid-cols-3 gap-2">
                     {ingredients.slice(0, 6).map((ing) => (
                       <div key={ing.id} className="border rounded p-2 text-sm">
@@ -202,7 +202,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 </div>
                 
                 <div>
-                  <h4 className="text-lg font-medium mb-2">Processing Steps</h4>
+                  <h4 className="text-lg font-medium mb-2">Passos de Processamento</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {processingSteps.slice(0, 4).map((step) => (
                       <div key={step.number} className="border rounded p-2 text-sm">
@@ -219,7 +219,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 </div>
               </div>
             ) : (
-              <p>No metadata available</p>
+              <p>Não há metadados disponíveis</p>
             )}
           </TabsContent>
           
@@ -227,7 +227,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
           <TabsContent value="ingredients" className="p-4">
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold">Formula Ingredients</h3>
+                <h3 className="text-xl font-semibold">Ingredientes da Fórmula</h3>
                 
                 {ingredients.length > 0 ? (
                   ingredients.map((ing) => (
@@ -246,19 +246,19 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                         </div>
                         
                         <div>
-                          <h5 className="text-sm font-medium text-muted-foreground">Quantity</h5>
+                          <h5 className="text-sm font-medium text-muted-foreground">Quantidade</h5>
                           <p>{ing.quantity}</p>
                         </div>
                         
                         <div>
-                          <h5 className="text-sm font-medium text-muted-foreground">Cost</h5>
+                          <h5 className="text-sm font-medium text-muted-foreground">Custo</h5>
                           <p>{ing.cost}</p>
                         </div>
                       </div>
                       
                       {ing.nutritionalValues && Object.keys(ing.nutritionalValues).length > 0 && (
                         <>
-                          <h5 className="text-sm font-medium mb-2">Nutritional Values</h5>
+                          <h5 className="text-sm font-medium mb-2">Valores Nutricionais</h5>
                           <div className="grid grid-cols-3 gap-2">
                             {Object.entries(ing.nutritionalValues).map(([key, value]) => (
                               <div key={key} className="text-sm border rounded p-2">
@@ -272,7 +272,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                     </div>
                   ))
                 ) : (
-                  <p>No ingredients data available</p>
+                  <p>Não há dados de ingredientes disponíveis</p>
                 )}
               </div>
             </ScrollArea>
@@ -281,7 +281,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
           <TabsContent value="nutritional" className="p-4">
             {nutritionalProfile ? (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold">Nutritional Profile</h3>
+                <h3 className="text-xl font-semibold">Perfil Nutricional</h3>
                 
                 <div className="grid grid-cols-2 gap-6">
                   <div className="border rounded-lg p-4">
@@ -289,48 +289,48 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                     
                     <div className="space-y-4">
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Total Protein</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Proteína Total</h5>
                         <p className="text-lg">{nutritionalProfile.protein}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Total Fat</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Gordura Total</h5>
                         <p className="text-lg">{nutritionalProfile.fat}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Total Fiber</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Fibra Total</h5>
                         <p className="text-lg">{nutritionalProfile.fiber}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Metabolizable Energy</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Energia Metabolizável</h5>
                         <p className="text-lg">{nutritionalProfile.energy}</p>
                       </div>
                     </div>
                   </div>
                   
                   <div className="border rounded-lg p-4">
-                    <h4 className="text-lg font-medium mb-4">Minerals & Amino Acids</h4>
+                    <h4 className="text-lg font-medium mb-4">Minerais & Aminoácidos</h4>
                     
                     <div className="space-y-4">
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Total Calcium</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Cálcio Total</h5>
                         <p className="text-lg">{nutritionalProfile.calcium}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Total Phosphorus</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Fósforo Total</h5>
                         <p className="text-lg">{nutritionalProfile.phosphorus}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Lysine Total</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Lisina Total</h5>
                         <p className="text-lg">{nutritionalProfile.lysine}</p>
                       </div>
                       
                       <div>
-                        <h5 className="text-sm font-medium text-muted-foreground">Methionine Total</h5>
+                        <h5 className="text-sm font-medium text-muted-foreground">Metionina Total</h5>
                         <p className="text-lg">{nutritionalProfile.methionine}</p>
                       </div>
                     </div>
@@ -339,7 +339,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 
                 {labelingInfo?.guaranteedAnalysis?.length > 0 && (
                   <div className="border rounded-lg p-4 mt-6">
-                    <h4 className="text-lg font-medium mb-4">Guaranteed Analysis</h4>
+                    <h4 className="text-lg font-medium mb-4">Análise Garantida</h4>
                     
                     <div className="grid grid-cols-3 gap-4">
                       {labelingInfo.guaranteedAnalysis.map((comp: any, idx: number) => (
@@ -368,7 +368,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 )}
               </div>
             ) : (
-              <p>No nutritional profile data available</p>
+              <p>Não há dados de perfil nutricional disponíveis</p>
             )}
           </TabsContent>
           
@@ -380,34 +380,34 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Manufacturer</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Fabricante</h4>
                       <p>{labelingInfo.manufacturer}</p>
                     </div>
                     
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Address</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Endereço</h4>
                       <p>{labelingInfo.address}</p>
                     </div>
                     
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Registration Number</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Número de Registro</h4>
                       <p>{labelingInfo.registrationNumber}</p>
                     </div>
                     
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Batch Identifier Format</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Formato do Identificador de Lote</h4>
                       <p>{labelingInfo.batchIdentifier}</p>
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Storage Instructions</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Instruções de Armazenamento</h4>
                       <p>{labelingInfo.storageInstructions}</p>
                     </div>
                     
                     <div>
-                      <h4 className="text-sm font-medium text-muted-foreground">Shelf Life</h4>
+                      <h4 className="text-sm font-medium text-muted-foreground">Prazo de Validade</h4>
                       <p>{labelingInfo.shelfLife}</p>
                     </div>
                   </div>
@@ -416,26 +416,26 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 <Separator />
                 
                 <div className="border rounded-lg p-4">
-                  <h4 className="text-lg font-medium mb-4">Feeding Directions</h4>
+                  <h4 className="text-lg font-medium mb-4">Instruções de Alimentação</h4>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Animal Type</h5>
+                      <h5 className="text-sm font-medium text-muted-foreground">Tipo de Animal</h5>
                       <p>{labelingInfo.feedingDirections?.animalType}</p>
                     </div>
                     
                     <div>
-                      <h5 className="text-sm font-medium text-muted-foreground">Animal Age</h5>
+                      <h5 className="text-sm font-medium text-muted-foreground">Idade do Animal</h5>
                       <p>{labelingInfo.feedingDirections?.animalAge}</p>
                     </div>
                     
                     <div className="col-span-2">
-                      <h5 className="text-sm font-medium text-muted-foreground">Daily Amount</h5>
+                      <h5 className="text-sm font-medium text-muted-foreground">Quantidade Diária</h5>
                       <p>{labelingInfo.feedingDirections?.dailyAmount}</p>
                     </div>
                     
                     <div className="col-span-2">
-                      <h5 className="text-sm font-medium text-muted-foreground">Special Instructions</h5>
+                      <h5 className="text-sm font-medium text-muted-foreground">Instruções Especiais</h5>
                       <p>{labelingInfo.feedingDirections?.specialInstructions}</p>
                     </div>
                   </div>
@@ -443,7 +443,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 
                 {labelingInfo.guaranteedAnalysis?.length > 0 && (
                   <div className="border rounded-lg p-4">
-                    <h4 className="text-lg font-medium mb-4">Guaranteed Analysis</h4>
+                    <h4 className="text-lg font-medium mb-4">Análise Garantida</h4>
                     
                     <div className="grid grid-cols-2 gap-4">
                       {labelingInfo.guaranteedAnalysis.map((comp: any, idx: number) => (
@@ -472,14 +472,14 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                 )}
               </div>
             ) : (
-              <p>No labeling information available</p>
+              <p>Não há informações de etiqueta disponíveis</p>
             )}
           </TabsContent>
           
           <TabsContent value="processing" className="p-4">
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold">Processing Instructions</h3>
+                <h3 className="text-xl font-semibold">Instruções de Processamento</h3>
                 
                 {processingSteps.length > 0 ? (
                   <div className="space-y-6">
@@ -491,19 +491,19 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                         
                         <div className="grid grid-cols-2 gap-4 mb-4">
                           <div className="col-span-2">
-                            <h5 className="text-sm font-medium text-muted-foreground">Description</h5>
+                            <h5 className="text-sm font-medium text-muted-foreground">Descrição</h5>
                             <p>{step.description}</p>
                           </div>
                           
                           <div>
-                            <h5 className="text-sm font-medium text-muted-foreground">Equipment</h5>
+                            <h5 className="text-sm font-medium text-muted-foreground">Equipamento</h5>
                             <p>{step.equipment}</p>
                           </div>
                         </div>
                         
                         {step.parameters.length > 0 && (
                           <div className="mb-4">
-                            <h5 className="text-sm font-medium text-muted-foreground mb-2">Parameters</h5>
+                            <h5 className="text-sm font-medium text-muted-foreground mb-2">Parametro</h5>
                             <div className="grid grid-cols-3 gap-2">
                               {step.parameters.map((param: any, idx: number) => (
                                 <div key={idx} className="text-sm border rounded p-2">
@@ -519,7 +519,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                         
                         {step.order.length > 0 && (
                           <div>
-                            <h5 className="text-sm font-medium text-muted-foreground mb-2">Order</h5>
+                            <h5 className="text-sm font-medium text-muted-foreground mb-2">Ordem</h5>
                             <ol className="list-decimal pl-5 space-y-1">
                               {step.order.map((item: any, idx: number) => (
                                 <li key={idx}>
@@ -533,7 +533,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
                     ))}
                   </div>
                 ) : (
-                  <p>No processing step data available</p>
+                  <p>Não há dados de passo de processamento disponíveis</p>
                 )}
               </div>
             </ScrollArea>

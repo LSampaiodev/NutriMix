@@ -66,10 +66,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           <Shield className="h-8 w-8 text-primary-foreground" />
         </div>
         <CardTitle className="text-2xl font-bold text-center">
-          Ration Guardian System
+          Sistema de TaG
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your credentials to access the system
+          Digite suas credenciais para acessar o sistema
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -81,13 +81,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Nome de Usuário</Label>
             <div className="relative">
               <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               <Input
                 id="username"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Digite seu nome de usuário"
                 className="pl-10"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -99,13 +99,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Senha</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Digite sua senha"
                 className="pl-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -128,12 +128,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
         <div className="text-center text-sm text-muted-foreground">
-          <p>Demo Credentials:</p>
+          <p>Credenciais de Demonstração:</p>
           <p><strong>Admin:</strong> admin / admin123</p>
-          <p><strong>Operator:</strong> operator / operator123</p>
+          <p><strong>Operador:</strong> operator / operator123</p>
         </div>
         <p className="text-center text-xs text-muted-foreground">
-          Protected by Ration Guardian System • {new Date().getFullYear()}
+        Protegido pelo Sistema de Guardian de Ração • {new Date().getFullYear()}
         </p>
       </CardFooter>
     </Card>
