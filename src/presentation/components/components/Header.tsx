@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback } from "@/presentation/components/components/ui/
 import { Bell, ChevronDown, Shield, LogOut, Settings, User as UserIcon } from "lucide-react";
 import { useAuth, getCurrentUser, logAuditEvent } from "@/infrastructure/api/auth";
 import { toast } from "sonner";
+import { SidebarHamburgerTrigger } from "@/presentation/components/components/ui/sidebar";
 
 const Header: React.FC = () => {
   const location = useLocation();
@@ -38,6 +39,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <SidebarHamburgerTrigger className="md:hidden mr-2" />
             <Link to="/dashboard" className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold text-primary">TagTwo</span>

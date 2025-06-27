@@ -61,7 +61,12 @@ const Labels = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-50">
-        <Sidebar>
+        {/* Sidebar: ocupa espaço lateral apenas em md+ */}
+        <Sidebar className="hidden md:block">
+          <SidebarContent />
+        </Sidebar>
+        {/* Sidebar Drawer para mobile */}
+        <Sidebar className="md:hidden fixed inset-0 z-40">
           <SidebarContent />
         </Sidebar>
         <div className="flex-1 flex flex-col overflow-hidden">
