@@ -10,6 +10,8 @@ export const parseXML = (xmlString: string): Promise<any> => {
         xmlString = convertBrazilianRationXml(xmlString);
       }
       
+      // Novo: detectar se é o padrão <Labels>
+      // (Não converte, apenas processa normalmente)
       // Using DOMParser for client-side XML parsing
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, "text/xml");
@@ -452,12 +454,79 @@ export const extractLabelData = (xmlObj: any): any => {
   try {
     const formula = xmlObj;
     
-    // Extract basic information - check if we're dealing with Brazilian format
+    // Detectar novo padrão <Labels>
+    const isLabelsFormat = formula.Labels !== undefined;
     const isBrazilianFormat = formula.PrescricaoRacao !== undefined;
     
     let metadata, labelInfo, nutritionalProfile, guaranteedAnalysis, ingredients, feedingDirections;
     
-    if (isBrazilianFormat) {
+    if (isLabelsFormat) {
+      // Novo: extração para padrão <Labels>
+      // Suporta múltiplos <Label>, pega o primeiro por padrão
+      const label = Array.isArray(formula.Labels.Label) ? formula.Labels.Label[0] : formula.Labels.Label;
+      // General
+      const general = label.General || {};
+      metadata = {
+        Name: general.Code || "Sem nome",
+        Category: general.MainLanguageCode || "Não categorizada",
+        SubCategory: general.Version || ""
+      };
+      // Ingredients (Section6 > Composition > Ingredient)
+      let ingredientsList: string[] = [];
+      if (label.Section6 && label.Section6.Composition && label.Section6.Composition.Ingredient) {
+        const ingr = label.Section6.Composition.Ingredient;
+        ingredientsList = Array.isArray(ingr)
+          ? ingr.map((i: any) => i.Description?.Translation?.Description || i.Description?.Description || i.Code || "Ingrediente desconhecido")
+          : [ingr.Description?.Translation?.Description || ingr.Description?.Description || ingr.Code || "Ingrediente desconhecido"];
+      }
+      // Guaranteed Analysis (Section9 > Analysis > Nutrients > Nutrient)
+      let guaranteedComponents: any[] = [];
+      if (label.Section9 && label.Section9.Analysis && label.Section9.Analysis.Nutrients && label.Section9.Analysis.Nutrients.Nutrient) {
+        const nutrients = label.Section9.Analysis.Nutrients.Nutrient;
+        guaranteedComponents = Array.isArray(nutrients)
+          ? nutrients.map((n: any) => ({
+              "@attributes": {
+                name: n.Description?.Translation?.Description || n.Description?.Description || n.Code || "Nutriente desconhecido",
+                minimum: n.Minimum || n.Value || undefined,
+                maximum: n.Maximum || undefined,
+                unit: n.Unit?.Translation?.Description || n.Unit?.Description || ""
+              }
+            }))
+          : [{
+              "@attributes": {
+                name: nutrients.Description?.Translation?.Description || nutrients.Description?.Description || nutrients.Code || "Nutriente desconhecido",
+                minimum: nutrients.Minimum || nutrients.Value || undefined,
+                maximum: nutrients.Maximum || undefined,
+                unit: nutrients.Unit?.Translation?.Description || nutrients.Unit?.Description || ""
+              }
+            }];
+      }
+      // Feeding Directions (Section12 > Parameter > Value)
+      let feedingDirectionsValue = "";
+      if (label.Section12 && label.Section12.Parameter && label.Section12.Parameter.Value) {
+        feedingDirectionsValue = label.Section12.Parameter.Value;
+      }
+      // Label Info (General + Section4, Section14, Section15)
+      labelInfo = {
+        ProductName: general.Code || "Produto sem nome",
+        Manufacturer: general.Site_Code || "Fabricante desconhecido",
+        ManufacturerAddress: "Não especificado",
+        RegistrationNumber: general.Version || "Sem registro",
+        StorageInstructions: label.Section15?.Text?.Value?.Translation?.Description || "Armazenar em local seco e arejado",
+        ShelfLife: {
+          "#text": label.Section14?.Parameter?.Value || "Não especificado",
+          "@attributes": { unit: label.Section14?.Parameter?.Unit?.Translation?.Description || label.Section14?.Parameter?.Unit?.Description || "dias" }
+        }
+      };
+      feedingDirections = {
+        AnimalType: "Não especificado",
+        AnimalAge: { "#text": "Não especificado", "@attributes": { unit: "" } },
+        DailyAmount: feedingDirectionsValue || "Conforme recomendação",
+        SpecialInstructions: feedingDirectionsValue || "Sem instruções especiais"
+      };
+      guaranteedAnalysis = { Component: guaranteedComponents };
+      ingredients = ingredientsList;
+    } else if (isBrazilianFormat) {
       // Map Brazilian format to standard format
       metadata = {
         Name: formula.PrescricaoRacao?.Produto?.Nome || "Sem nome",
@@ -707,4 +776,9 @@ export const getProcessedXmls = (): ProcessedXml[] => {
 export const getProcessedXmlById = (id: string): ProcessedXml | null => {
   const records = getProcessedXmls();
   return records.find(r => r.id === id) || null;
+};
+
+// Função para detectar o novo padrão <Labels>
+const isLabelsXml = (xmlString: string): boolean => {
+  return xmlString.includes('<Labels>') && xmlString.includes('<Label>');
 };

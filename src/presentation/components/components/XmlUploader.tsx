@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/presentation/components/components/ui
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/components/ui/select";
 import { FileUp, FileQuestion, Check, AlertCircle } from "lucide-react";
 import { parseXML, validateXmlSecurity, saveProcessedXml, getSampleXmlData } from "@/core/services/xmlUtils";
-import { xmlUploadSchema, validateData } from "@/core/services/validation";
+import { xmlUploadSchema, validateData, labelsXmlSchema } from "@/core/services/validation";
 import { Progress } from "@/presentation/components/components/ui/progress";
 import { logAuditEvent } from "@/infrastructure/api/auth";
 import { toast } from "sonner";
@@ -79,10 +79,24 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       }
       
       // Try to parse the XML to ensure it's valid
-      await parseXML(content);
-      setProgress(90);
-      
-      // If we made it here, the file is valid
+      const parsed = await parseXML(content);
+      setProgress(80);
+
+      // Detectar se é padrão <Labels> e validar
+      if (parsed.Labels) {
+        const validation = labelsXmlSchema.safeParse(parsed);
+        if (!validation.success) {
+          setValidationStatus('invalid');
+          setValidationIssues(validation.error.errors.map(e => `${e.path.join('.')} - ${e.message}`));
+          logAuditEvent("xml_labels_validation_failed", {
+            filename: file.name,
+            issues: validation.error.errors.map(e => `${e.path.join('.')} - ${e.message}`)
+          });
+          setProgress(100);
+          return;
+        }
+      }
+      // Se chegou aqui, está válido
       setValidationStatus('valid');
       logAuditEvent("xml_validation_success", { filename: file.name });
       toast.success("XML validado com sucesso");
@@ -122,6 +136,16 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       const parsedData = await parseXML(content);
       setProgress(60);
       
+      // Detectar se é padrão <Labels> e validar
+      if (parsedData.Labels) {
+        const validation = labelsXmlSchema.safeParse(parsedData);
+        if (!validation.success) {
+          setError("Erro de validação do XML <Labels>: " + validation.error.errors.map(e => `${e.path.join('.')} - ${e.message}`).join(", "));
+          setIsUploading(false);
+          setProgress(100);
+          return;
+        }
+      }
       // Save processed XML
       await saveProcessedXml(content, parsedData);
       setProgress(80);

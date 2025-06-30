@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 // Validation schema for login form
@@ -91,3 +90,205 @@ export const validateData = <T>(
     };
   }
 };
+
+// Schema for <Labels> XML padrão
+export const labelsXmlSchema = z.object({
+  Labels: z.object({
+    Label: z.union([
+      z.array(z.object({
+        General: z.object({
+          Code: z.string(),
+          Version: z.string(),
+          Site_Code: z.string(),
+          MainLanguageCode: z.string()
+        }),
+        Section1: z.any().optional(),
+        Section2: z.any().optional(),
+        Section3: z.any().optional(),
+        Section4: z.any().optional(),
+        Section6: z.object({
+          Composition: z.object({
+            Ingredient: z.union([
+              z.array(z.object({
+                Order: z.string().or(z.number().transform(String)),
+                Code: z.string(),
+                Description: z.object({
+                  Translation: z.object({
+                    LanguageCode: z.string(),
+                    Description: z.string()
+                  })
+                }),
+                Value: z.string().or(z.number().transform(String)),
+                Unit: z.string(),
+                Enumber: z.string().optional()
+              })),
+              z.object({
+                Order: z.string().or(z.number().transform(String)),
+                Code: z.string(),
+                Description: z.object({
+                  Translation: z.object({
+                    LanguageCode: z.string(),
+                    Description: z.string()
+                  })
+                }),
+                Value: z.string().or(z.number().transform(String)),
+                Unit: z.string(),
+                Enumber: z.string().optional()
+              })
+            ])
+          })
+        }).optional(),
+        Section9: z.object({
+          Analysis: z.object({
+            Nutrients: z.object({
+              Nutrient: z.union([
+                z.array(z.object({
+                  Order: z.string().or(z.number().transform(String)),
+                  Code: z.string(),
+                  Description: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }),
+                  Value: z.string().or(z.number().transform(String)).optional(),
+                  EndProductValue: z.string().or(z.number().transform(String)).optional(),
+                  Minimum: z.string().or(z.number().transform(String)).optional(),
+                  Maximum: z.string().or(z.number().transform(String)).optional(),
+                  Target: z.string().or(z.number().transform(String)).optional(),
+                  Unit: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }).optional()
+                })),
+                z.object({
+                  Order: z.string().or(z.number().transform(String)),
+                  Code: z.string(),
+                  Description: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }),
+                  Value: z.string().or(z.number().transform(String)).optional(),
+                  EndProductValue: z.string().or(z.number().transform(String)).optional(),
+                  Minimum: z.string().or(z.number().transform(String)).optional(),
+                  Maximum: z.string().or(z.number().transform(String)).optional(),
+                  Target: z.string().or(z.number().transform(String)).optional(),
+                  Unit: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }).optional()
+                })
+              ])
+            })
+          })
+        }).optional(),
+        Section12: z.any().optional(),
+        Section14: z.any().optional(),
+        Section15: z.any().optional()
+      })),
+      z.object({
+        General: z.object({
+          Code: z.string(),
+          Version: z.string(),
+          Site_Code: z.string(),
+          MainLanguageCode: z.string()
+        }),
+        Section1: z.any().optional(),
+        Section2: z.any().optional(),
+        Section3: z.any().optional(),
+        Section4: z.any().optional(),
+        Section6: z.object({
+          Composition: z.object({
+            Ingredient: z.union([
+              z.array(z.object({
+                Order: z.string().or(z.number().transform(String)),
+                Code: z.string(),
+                Description: z.object({
+                  Translation: z.object({
+                    LanguageCode: z.string(),
+                    Description: z.string()
+                  })
+                }),
+                Value: z.string().or(z.number().transform(String)),
+                Unit: z.string(),
+                Enumber: z.string().optional()
+              })),
+              z.object({
+                Order: z.string().or(z.number().transform(String)),
+                Code: z.string(),
+                Description: z.object({
+                  Translation: z.object({
+                    LanguageCode: z.string(),
+                    Description: z.string()
+                  })
+                }),
+                Value: z.string().or(z.number().transform(String)),
+                Unit: z.string(),
+                Enumber: z.string().optional()
+              })
+            ])
+          })
+        }).optional(),
+        Section9: z.object({
+          Analysis: z.object({
+            Nutrients: z.object({
+              Nutrient: z.union([
+                z.array(z.object({
+                  Order: z.string().or(z.number().transform(String)),
+                  Code: z.string(),
+                  Description: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }),
+                  Value: z.string().or(z.number().transform(String)).optional(),
+                  EndProductValue: z.string().or(z.number().transform(String)).optional(),
+                  Minimum: z.string().or(z.number().transform(String)).optional(),
+                  Maximum: z.string().or(z.number().transform(String)).optional(),
+                  Target: z.string().or(z.number().transform(String)).optional(),
+                  Unit: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }).optional()
+                })),
+                z.object({
+                  Order: z.string().or(z.number().transform(String)),
+                  Code: z.string(),
+                  Description: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }),
+                  Value: z.string().or(z.number().transform(String)).optional(),
+                  EndProductValue: z.string().or(z.number().transform(String)).optional(),
+                  Minimum: z.string().or(z.number().transform(String)).optional(),
+                  Maximum: z.string().or(z.number().transform(String)).optional(),
+                  Target: z.string().or(z.number().transform(String)).optional(),
+                  Unit: z.object({
+                    Translation: z.object({
+                      LanguageCode: z.string(),
+                      Description: z.string()
+                    })
+                  }).optional()
+                })
+              ])
+            })
+          })
+        }).optional(),
+        Section12: z.any().optional(),
+        Section14: z.any().optional(),
+        Section15: z.any().optional()
+      })
+    ])
+  })
+});
