@@ -8,10 +8,20 @@ import { Shield, User, Lock } from "lucide-react";
 import { login, logAuditEvent } from "@/infrastructure/api/auth";
 import { loginSchema, validateData } from "@/core/services/validation";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/components/ui/select";
 
 interface LoginFormProps {
   onSuccess?: () => void;
 }
+
+const UNITS = [
+  { code: "89", name: "Rio Claro - Unidade 1" },
+  { code: "90", name: "Rio Claro - Unidade 2" },
+  { code: "87", name: "Toledo" },
+  { code: "83", name: "Itaberai" },
+  { code: "88", name: "Apucarana" },
+  { code: "85", name: "Guararapes" },
+];
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [username, setUsername] = useState("");
@@ -19,6 +29,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [unit, setUnit] = useState<string>("");
+  const [unitsAllowed, setUnitsAllowed] = useState<string[]>([]);
+  const [showUnitSelect, setShowUnitSelect] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,12 +53,35 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       const success = await login(username, password);
       
       if (success) {
-        logAuditEvent("login", { username });
-        if (onSuccess) {
-          onSuccess();
+        // Mock: buscar unidades permitidas do usuário
+        // No real, viria do backend
+        let allowed: string[] = [];
+        if (username === "admin") {
+          allowed = ["all", ...UNITS.map(u => u.code)];
+        } else if (username === "operator") {
+          allowed = ["89"];
         } else {
-          navigate("/dashboard");
+          allowed = ["89"];
         }
+        setUnitsAllowed(allowed);
+        setShowUnitSelect(true);
+        // Se só tem uma unidade, já seleciona
+        if (allowed.length === 1) {
+          setUnit(allowed[0]);
+          localStorage.setItem("active_unit", allowed[0]);
+          logAuditEvent("login", { username, unit: allowed[0] });
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate("/dashboard");
+          }
+        }
+        // Se tem permissão global, pode escolher 'todas'
+        if (allowed.includes("all")) {
+          setUnit("all");
+        }
+        // Não navega ainda, espera seleção
+        return;
       } else {
         setError("Invalid username or password");
         logAuditEvent("login_failed", { username, reason: "Invalid credentials" });
@@ -116,14 +152,55 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             )}
           </div>
           
-          <Button 
-            type="submit" 
-            className="w-full" 
-            size="lg"
-            disabled={isLoading}
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </Button>
+          {/* Seleção de unidade após login */}
+          {showUnitSelect && (
+            <div className="space-y-2">
+              <Label htmlFor="unit">Unidade</Label>
+              <Select
+                value={unit}
+                onValueChange={(value) => setUnit(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a unidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {unitsAllowed.includes("all") && (
+                    <SelectItem value="all">Todas as Unidades</SelectItem>
+                  )}
+                  {UNITS.filter(u => unitsAllowed.includes(u.code)).map(u => (
+                    <SelectItem key={u.code} value={u.code}>{u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                className="w-full mt-2"
+                onClick={() => {
+                  if (!unit) return setError("Selecione uma unidade");
+                  localStorage.setItem("active_unit", unit);
+                  logAuditEvent("login", { username, unit });
+                  if (onSuccess) {
+                    onSuccess();
+                  } else {
+                    navigate("/dashboard");
+                  }
+                }}
+                disabled={!unit}
+              >
+                Entrar na Unidade
+              </Button>
+            </div>
+          )}
+          {!showUnitSelect && (
+            <Button 
+              type="submit" 
+              className="w-full" 
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </Button>
+          )}
         </form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">

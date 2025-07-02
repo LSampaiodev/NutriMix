@@ -10,6 +10,7 @@ import {
   Sidebar,
   SidebarTrigger,
   SidebarHamburgerTrigger,
+  useSidebar,
 } from "@/presentation/components/components/ui/sidebar";
 import XmlUploader from "@/presentation/components/components/XmlUploader";
 import XmlViewer from "@/presentation/components/components/XmlViewer";
@@ -18,6 +19,16 @@ import { getProcessedXmls } from "@/core/services/xmlUtils";
 import { Badge } from "@/presentation/components/components/ui/badge";
 import { Button } from "@/presentation/components/components/ui/button";
 import { FileText, Clock, BarChart3, Clipboard, ArrowRight } from "lucide-react";
+import ProductImportModal from "@/presentation/components/components/ProductImportModal";
+
+const DashboardMainContent = ({ children }: { children: React.ReactNode }) => {
+  const { state, isMobile } = useSidebar();
+  // Centraliza quando sidebar está fechado e não está em mobile
+  const mainClass =
+    "flex-1 w-full flex flex-col overflow-y-auto px-4 md:px-8" +
+    (!isMobile && state === "collapsed" ? " max-w-2xl mx-auto" : "");
+  return <main className={mainClass}>{children}</main>;
+};
 
 const Dashboard = () => {
   const { isAuthenticated } = useAuth();
@@ -50,7 +61,7 @@ const Dashboard = () => {
         </Sidebar>
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <DashboardMainContent>
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h1 className="text-2xl font-bold">Dashboard</h1>
@@ -59,6 +70,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="flex items-center space-x-2">
+                <ProductImportModal />
                 <SidebarHamburgerTrigger />
                 <SidebarTrigger />
               </div>
@@ -159,7 +171,7 @@ const Dashboard = () => {
                 <LabelGenerator xmlData={xmlData} />
               </TabsContent>
             </Tabs>
-          </main>
+          </DashboardMainContent>
         </div>
       </div>
     </SidebarProvider>

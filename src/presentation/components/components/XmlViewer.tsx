@@ -116,7 +116,7 @@ const XmlViewer: React.FC<XmlViewerProps> = ({ data, rawXml }) => {
         <CardHeader>
           <CardTitle>XML Viewer</CardTitle>
           <CardDescription>
-            No XML data available for viewing
+            Nenhum dado XML disponível para visualização
           </CardDescription>
         </CardHeader>
       </Card>

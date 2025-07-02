@@ -522,7 +522,7 @@ export const extractLabelData = (xmlObj: any): any => {
         AnimalType: "Não especificado",
         AnimalAge: { "#text": "Não especificado", "@attributes": { unit: "" } },
         DailyAmount: feedingDirectionsValue || "Conforme recomendação",
-        SpecialInstructions: feedingDirectionsValue || "Sem instruções especiais"
+        specialInstructions: feedingDirectionsValue || "Sem instruções especiais"
       };
       guaranteedAnalysis = { Component: guaranteedComponents };
       ingredients = ingredientsList;
@@ -667,8 +667,13 @@ export const extractLabelData = (xmlObj: any): any => {
     });
     
     // Combine all data needed for the label with fallbacks for missing values
+    let fallbackGeneralCode = undefined;
+    if (isLabelsFormat) {
+      const label = Array.isArray(formula.Labels.Label) ? formula.Labels.Label[0] : formula.Labels.Label;
+      fallbackGeneralCode = label?.General?.Code;
+    }
     return {
-      productName: labelInfo?.ProductName || metadata?.Name || "Unnamed Product",
+      productName: labelInfo?.ProductName || labelInfo?.Name || metadata?.Name || fallbackGeneralCode || "Unnamed Product",
       manufacturer: labelInfo?.Manufacturer || "Unknown Manufacturer",
       address: labelInfo?.ManufacturerAddress || "Address not specified",
       registrationNumber: labelInfo?.RegistrationNumber || "No registration number",
@@ -742,28 +747,31 @@ export const saveProcessedXml = async (
 ): Promise<ProcessedXml> => {
   // Generate hash for the content
   const hash = await hashXmlContent(content);
-  
   // Get metadata from parsed XML
-  const metadata = parsedData.Metadata;
-  const labelInfo = parsedData.LabelingInformation;
-  
+  const metadata = parsedData.Metadata || {};
+  const labelInfo = parsedData.LabelingInformation || {};
+  // Fallback para nome do produto
+  let fallbackGeneralCode = undefined;
+  if (parsedData.Labels && parsedData.Labels.Label) {
+    const label = Array.isArray(parsedData.Labels.Label) ? parsedData.Labels.Label[0] : parsedData.Labels.Label;
+    fallbackGeneralCode = label?.General?.Code;
+  }
+  const name = labelInfo.ProductName || labelInfo.Name || metadata.Name || fallbackGeneralCode || "Unnamed Formula";
   // Create a new processed XML record
   const newRecord: ProcessedXml = {
     id: crypto.randomUUID(),
-    name: labelInfo.ProductName || metadata.Name || "Unnamed Formula",
+    name,
     category: `${metadata.Category || "Uncategorized"} - ${metadata.SubCategory || ""}`,
     content,
     hash,
     processed: true,
     created: new Date().toISOString()
   };
-  
   // In a real app, you would send this to an API endpoint
   // For demo purposes, we'll store it in localStorage
   const existingRecords = JSON.parse(localStorage.getItem("processed_xml") || "[]");
   existingRecords.push(newRecord);
   localStorage.setItem("processed_xml", JSON.stringify(existingRecords));
-  
   return newRecord;
 };
 

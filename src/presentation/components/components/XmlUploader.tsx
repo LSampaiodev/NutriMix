@@ -11,6 +11,7 @@ import { xmlUploadSchema, validateData, labelsXmlSchema } from "@/core/services/
 import { Progress } from "@/presentation/components/components/ui/progress";
 import { logAuditEvent } from "@/infrastructure/api/auth";
 import { toast } from "sonner";
+import { useUnit } from "@/presentation/components/components/UnitContext";
 
 interface XmlUploaderProps {
   onUploadSuccess: (data: any, xmlContent: string) => void;
@@ -25,6 +26,7 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
   const [validationIssues, setValidationIssues] = useState<string[]>([]);
   const [xmlFormat, setXmlFormat] = useState<"standard" | "brazilian">("standard");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { unit } = useUnit();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
@@ -54,19 +56,15 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       setError("Please select an XML file first");
       return;
     }
-
     setValidationStatus('validating');
     setProgress(10);
-
     try {
       // Read the file content
       const content = await readFileContent(file);
       setProgress(30);
-      
       // Check for security issues
       const securityCheck = validateXmlSecurity(content);
       setProgress(60);
-      
       if (!securityCheck.valid) {
         setValidationStatus('invalid');
         setValidationIssues(securityCheck.issues);
@@ -77,11 +75,9 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
         setProgress(100);
         return;
       }
-      
       // Try to parse the XML to ensure it's valid
       const parsed = await parseXML(content);
       setProgress(80);
-
       // Detectar se é padrão <Labels> e validar
       if (parsed.Labels) {
         const validation = labelsXmlSchema.safeParse(parsed);
@@ -94,6 +90,19 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
           });
           setProgress(100);
           return;
+        }
+        // Validação de unidade ativa
+        if (unit !== "all") {
+          // Extrair código da unidade do XML (General.Site_Code)
+          const label = Array.isArray(parsed.Labels.Label) ? parsed.Labels.Label[0] : parsed.Labels.Label;
+          const xmlUnit = label?.General?.Site_Code;
+          if (xmlUnit !== unit) {
+            setValidationStatus('invalid');
+            setValidationIssues([`O XML pertence à unidade ${xmlUnit}, mas a unidade ativa é ${unit}.`]);
+            logAuditEvent("xml_unit_mismatch", { filename: file.name, xmlUnit, activeUnit: unit });
+            setProgress(100);
+            return;
+          }
         }
       }
       // Se chegou aqui, está válido
@@ -118,24 +127,19 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       setError("Please select and validate an XML file first");
       return;
     }
-    
     if (validationStatus !== 'valid') {
       setError("Please validate the XML file before processing");
       return;
     }
-    
     setIsUploading(true);
     setProgress(10);
-    
     try {
       // Read the file content
       const content = await readFileContent(file);
       setProgress(30);
-      
       // Parse XML
       const parsedData = await parseXML(content);
       setProgress(60);
-      
       // Detectar se é padrão <Labels> e validar
       if (parsedData.Labels) {
         const validation = labelsXmlSchema.safeParse(parsedData);
@@ -145,17 +149,25 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
           setProgress(100);
           return;
         }
+        // Validação de unidade ativa
+        if (unit !== "all") {
+          const label = Array.isArray(parsedData.Labels.Label) ? parsedData.Labels.Label[0] : parsedData.Labels.Label;
+          const xmlUnit = label?.General?.Site_Code;
+          if (xmlUnit !== unit) {
+            setError(`O XML pertence à unidade ${xmlUnit}, mas a unidade ativa é ${unit}.`);
+            setIsUploading(false);
+            setProgress(100);
+            return;
+          }
+        }
       }
       // Save processed XML
       await saveProcessedXml(content, parsedData);
       setProgress(80);
-      
       // Call the success callback
       onUploadSuccess(parsedData, content);
-      
       // Log the event
       logAuditEvent("xml_processed", { filename: file.name });
-      
       // Reset form
       setFile(null);
       setValidationStatus('idle');
@@ -163,7 +175,6 @@ const XmlUploader: React.FC<XmlUploaderProps> = ({ onUploadSuccess }) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
       toast.success("XML processado com sucesso");
     } catch (err) {
       console.error("XML processing error:", err);
