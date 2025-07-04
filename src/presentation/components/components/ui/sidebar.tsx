@@ -374,5 +374,6 @@ export {
   SidebarRail,
   SidebarInset,
   SidebarInput,
-  SidebarHamburgerTrigger
+  SidebarHamburgerTrigger,
+  useSidebar
 };
