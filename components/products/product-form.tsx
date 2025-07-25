@@ -238,13 +238,90 @@ export function ProductForm() {
           {formData.niveisGarantia && formData.niveisGarantia.length > 0 && (
             <div className="space-y-2">
               <Label>Níveis de Garantia</Label>
-              <ul className="border rounded p-2 bg-muted/50">
-                {formData.niveisGarantia.map((g: Garantia, idx: number) => (
-                  <li key={idx} className="mb-1">
-                    <b>{g.order}.</b> {g.nome} ({g.code}) - {g.valor}{g.unidade} {g.minimo && `(Mín: ${g.minimo})`} {g.maximo && `(Máx: ${g.maximo})`}
-                  </li>
-                ))}
-              </ul>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border rounded bg-muted/50">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-1 text-left">Nutriente</th>
+                      <th className="px-2 py-1 text-left">Valor</th>
+                      <th className="px-2 py-1 text-left">Unidade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.niveisGarantia.map((g: Garantia, idx: number) => (
+                      <tr
+                        key={idx}
+                        className="hover:bg-blue-100 cursor-pointer relative"
+                        title={`Selecionado: ${g.nome}`}
+                      >
+                        <td className="px-2 py-1">{g.nome}</td>
+                        <td className="px-2 py-1">{g.valor}</td>
+                        <td className="px-2 py-1">{g.unidade}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Tabela de %VRN conforme IN 75/2020 */}
+              <div className="overflow-x-auto mt-4">
+                <Label>Tabela de %VRN por 100g de suplemento</Label>
+                <table className="min-w-full border rounded bg-muted/50 mt-2">
+                  <thead>
+                    <tr>
+                      <th className="px-2 py-1 text-left">Garantia</th>
+                      <th className="px-2 py-1 text-left">Valor de Referência VR¹</th>
+                      <th className="px-2 py-1 text-left">Quantidade por 100g</th>
+                      <th className="px-2 py-1 text-left">% do VR por 100g</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.niveisGarantia.map((g: Garantia, idx: number) => {
+                      // Valores de referência da Anvisa IN 75/2020 (exemplo, pode ser expandido)
+                      const valoresReferencia: Record<string, number> = {
+                        "Proteína Bruta": 50,
+                        "Carboidrato": 300,
+                        "Fibra Alimentar": 25,
+                        "Gordura Total": 55,
+                        "Gordura Saturada": 22,
+                        "Sódio": 2000,
+                        "Vitamina A": 600,
+                        "Vitamina D": 5,
+                        "Vitamina C": 45,
+                        "Vitamina E": 10,
+                        "Vitamina K": 65,
+                        "Vitamina B1": 1.2,
+                        "Vitamina B2": 1.3,
+                        "Vitamina B3": 16,
+                        "Vitamina B6": 1.3,
+                        "Vitamina B12": 2.4,
+                        "Ácido Fólico": 240,
+                        "Cálcio": 1000,
+                        "Ferro": 14,
+                        "Zinco": 7,
+                        "Magnésio": 260,
+                        "Fósforo": 700,
+                        "Potássio": 3500,
+                        // ... outros nutrientes
+                      };
+                      const vr = valoresReferencia[g.nome] || null;
+                      const quantidade = Number(g.valor);
+                      const porcentagem = vr ? ((quantidade / vr) * 100).toFixed(2) : "-"; // Calculo de porcentagem
+                    
+                      return (
+                        <tr key={idx}
+                        className="hover:bg-blue-100 cursor-pointer relative"
+                        title={`Selecionado: ${g.nome}`}>
+                          <td className="px-2 py-1">{g.nome}</td>
+                          <td className="px-2 py-1">{vr ? `${vr} ${g.unidade}` : "-"}</td>
+                          <td className="px-2 py-1">{g.valor} {g.unidade}</td>
+                          <td className="px-2 py-1">{porcentagem !== "-" ? `${porcentagem}%` : "-"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <p className="text-xs mt-2">VR¹: Valor de Referência Diário segundo IN nº 75/2020 Anvisa</p>
+              </div>
             </div>
           )}
           {formData.substitutivos && formData.substitutivos.length > 0 && (
