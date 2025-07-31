@@ -113,7 +113,7 @@ export function AppSidebar() {
                   <span className="text-lg font-bold">T</span>
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">NutriMix</span>
+                  <span className="font-semibold">NutriMixx</span>
                   <span className="text-xs">Sistema de Rotulagem</span>
                 </div>
               </Link>

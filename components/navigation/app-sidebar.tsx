@@ -29,7 +29,7 @@ export function AppSidebar() {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/" onClick={closeMobileSidebar}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-orange-500 text-white">
-                  <span className="text-lg font-bold">T</span>
+                  <span className="text-lg font-bold">N</span>
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">NutriMix</span>

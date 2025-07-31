@@ -9,25 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Printer, Save, Eye, Upload, Settings, Palette, Type, ImageIcon } from "lucide-react"
+import { Printer, Save, Eye, NotepadTextDashed, Settings, Palette, Type, ImageIcon } from "lucide-react"
 
 export function LabelDesigner() {
   const [labelData, setLabelData] = useState({
     codigo: "",
     idRotulo: "",
     descricao: "",
-    ultimaAtualizacao: "",
-    bobinaEtiqueta: "",
-    layout: "",
-    prazoValidade: "",
+    idioma: "Português",
     quantidade: 1,
     data: new Date().toISOString().split("T")[0],
     lote: "",
-    peso: "",
-    idioma: "Português",
-  })
-  // TODO: Buscar dados da empresa/unidade selecionada do back-end
-
+    peso: ""
+  });
   return (
     <div className="space-y-6">
       {/* Header com ações principais */}
@@ -37,7 +31,7 @@ export function LabelDesigner() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5" />
-                Designer de Rótulos
+                Rotulos
               </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Crie e edite rótulos personalizados para seus produtos
@@ -45,8 +39,8 @@ export function LabelDesigner() {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
+                <NotepadTextDashed className="h-4 w-4 mr-2" />
+                Adicionar
               </Button>
               <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-2" />
@@ -56,10 +50,16 @@ export function LabelDesigner() {
                 <Save className="h-4 w-4 mr-2" />
                 Salvar
               </Button>
-              <Button size="sm">
-                <Printer className="h-4 w-4 mr-2" />
-                Imprimir
-              </Button>
+              <div className="relative group">
+                <Button size="sm" type="button">
+                  <Printer className="h-4 w-4 mr-2" />
+                  Imprimir
+                </Button>
+                <div className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg z-10 hidden group-hover:block">
+                  <button className="w-full text-left px-4 py-2 hover:bg-muted/50" type="button">Ficha Técnica</button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-muted/50" type="button">Croqui de Rótulo</button>
+                </div>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -224,17 +224,19 @@ export function LabelDesigner() {
 
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
-                      <Type className="h-4 w-4 mr-2" />
-                      Adicionar Texto
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ImageIcon className="h-4 w-4 mr-2" />
-                      Adicionar Imagem
-                    </Button>
-                    <Button variant="outline" size="sm">
                       <Settings className="h-4 w-4 mr-2" />
                       Configurações
                     </Button>
+                  </div>
+                  <div className="relative group mt-4">
+                    <Button size="sm" type="button">
+                      <Printer className="h-4 w-4 mr-2" />
+                      Imprimir
+                    </Button>
+                    <div className="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg z-10 hidden group-hover:block">
+                      <button className="w-full text-left px-4 py-2 hover:bg-muted/50" type="button">Ficha Técnica</button>
+                      <button className="w-full text-left px-4 py-2 hover:bg-muted/50" type="button">Croqui de Rótulo</button>
+                    </div>
                   </div>
                 </TabsContent>
 

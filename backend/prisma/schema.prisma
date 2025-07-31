@@ -6,11 +6,10 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -21,3 +20,25 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 }
+
+model Produto {
+  id                Int      @id @default(autoincrement())
+  codigo            String
+  versao            String
+  nome              String
+  classificacao     String
+  formaFisica       String
+  enriquecimento    String
+  indicacao         String
+  modoUsar          String
+  conteudoLiquido   String
+  prazoValidade     String
+  modoConservacao   String
+  restricoes        String
+  createdAt         DateTime @default(now())
+  // Campos complexos podem ser serializados como JSON
+  composicao        Json
+  substitutivos     Json
+  niveisGarantia    Json
+}
+

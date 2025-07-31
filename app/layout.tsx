@@ -9,8 +9,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "NutriMix - Sistema de Automação e Rotulagem",
-  description: "Sistema moderno para gestão de rótulos, etiquetas e certificados",
-    generator: 'v0.dev'
+  description: "Sistema moderno para gestão de rótulos, etiquetas e certificados"
 }
 
 export default function RootLayout({
@@ -20,6 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+      </head>
       <body className={inter.className}>
         <AppProvider>
           <MainLayout>{children}</MainLayout>
