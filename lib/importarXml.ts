@@ -4,11 +4,11 @@ export interface ProdutoImportado {
   codigo: string;
   versao: string;
   nome: string;
-  classificacao: string;
-  formaFisica: string;
-  composicao: Array<{ ordem: string; descricao: string; valor: string }>;
-  enriquecimento: string;
-  substitutivos: string[];
+  classificacao?: string;
+  formaFisica?: string;
+  composicao?: Array<{ ordem: string; descricao: string; valor: string }>;
+  enriquecimento?: string;
+  substitutivos?: string[];
   niveisGarantia: Array<{ nome: string; valor: string; unidade: string; min?: string; max?: string }>;
   indicacao: string;
   modoUsar: string;
@@ -19,7 +19,7 @@ export interface ProdutoImportado {
 }
 
 export function importarXml(xml: string): ProdutoImportado | null {
-  const parser = new XMLParser({ ignoreAttributes: false, parseNodeValue: true });
+  const parser = new XMLParser({ ignoreAttributes: false, parseTagValue: true });
   const obj = parser.parse(xml);
   const label = Array.isArray(obj.Labels?.Label) ? obj.Labels.Label[0] : obj.Labels?.Label;
   if (!label) return null;

@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { ProductService } from "@/services/product.service"
+import { toast } from "sonner"
+import { fetchProducts } from "@/app/components/products/useImportProduct"
 import type { Product, ProductFilters } from "@/types/product.types"
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<ProductFilters>({
@@ -15,52 +15,41 @@ export function useProducts() {
   })
 
   const loadProducts = useCallback(async () => {
+    setLoading(true)
+    setError(null)
     try {
-      setLoading(true)
-      setError(null)
-      const data = await ProductService.getProducts()
-      setProducts(data)
+      const data = await fetchProducts()
+      // Filtro simples no lado do cliente
+      const filteredData = data.filter(
+        (product: Product) =>
+          product.nome.toLowerCase().includes(filters.search.toLowerCase()) ||
+          product.codigo.toLowerCase().includes(filters.search.toLowerCase()),
+      )
+      setProducts(filteredData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao carregar produtos")
+      const errorMessage = err instanceof Error ? err.message : "Ocorreu um erro desconhecido"
+      setError(errorMessage)
+      toast.error(`Erro ao buscar produtos: ${errorMessage}`)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [filters.search])
 
-  const updateFilters = useCallback((newFilters: Partial<ProductFilters>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }))
-  }, [])
-
-  const deleteProduct = useCallback(
-    async (id: string) => {
-      try {
-        await ProductService.deleteProduct(id)
-        await loadProducts() // Recarrega a lista
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao excluir produto")
-      }
-    },
-    [loadProducts],
-  )
-
-  // Aplica filtros sempre que produtos ou filtros mudarem
-  useEffect(() => {
-    const filtered = ProductService.filterProducts(products, filters)
-    setFilteredProducts(filtered)
-  }, [products, filters])
-
-  // Carrega produtos na inicialização
   useEffect(() => {
     loadProducts()
   }, [loadProducts])
 
-  return {
-    products: filteredProducts,
-    loading,
-    error,
-    filters,
-    updateFilters,
-    deleteProduct,
-    refreshProducts: loadProducts,
+  const updateFilters = (newFilters: Partial<ProductFilters>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }))
   }
+
+  const deleteProduct = async (id: string) => {
+    // TODO: Implementar a lógica de exclusão (API e backend)
+    console.log("Excluir produto com ID:", id)
+    toast.info("Funcionalidade de exclusão ainda não implementada.")
+    // Após implementar, recarregue os produtos:
+    // await loadProducts();
+  }
+
+  return { products, loading, error, filters, updateFilters, deleteProduct }
 }

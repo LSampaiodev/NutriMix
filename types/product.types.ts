@@ -24,15 +24,15 @@ export interface Substitutivo {
 }
 
 export interface Product {
-  id: string;
-  idEtiqueta: string;
-  codigoProduto: string;
-  nomeProduto: string;
-  nrRevisao: number;
-  vFormula: number;
-  data: string;
-  bloqueada: boolean;
-  assinatura: boolean;
+  idEtiqueta: React.ReactNode;
+  id: number; // Corresponde ao tipo Int do Prisma
+  codigo: string; // Corresponde ao campo 'codigo' do Prisma
+  versao: string; // Corresponde ao campo 'versao' do Prisma
+  nome: string; // Corresponde ao campo 'nome' do Prisma
+  createdAt: string; // Corresponde ao tipo DateTime do Prisma (pode ser Date em JS)
+  // Campos que estavam na interface Product mas não no modelo Prisma foram removidos:
+  // idEtiqueta, bloqueada, assinatura, data (se não for persistido)
+
   // Novos campos do XML
   classificacao?: string;
   formaFisica?: string;
@@ -54,13 +54,13 @@ export interface ProductFilters {
 }
 
 export interface ProductFormData {
-  codigoProduto: string;
-  nomeProduto: string;
-  nrRevisao?: string | number;
-  vFormula?: string | number;
-  data?: string;
-  descricao?: string;
-  categoria?: string;
+  codigoProduto: string; // Mapeia para 'codigo' no backend
+  nomeProduto: string; // Mapeia para 'nome' no backend
+  nrRevisao?: string; // Mapeia para 'versao' no backend, input é string
+  vFormula?: string; // Mapeia para 'versao' no backend, input é string
+  data?: string; // Mantido para o formulário, mas não salvo no backend atualmente
+  descricao?: string; // Não mapeado no backend
+  categoria?: string; // Não mapeado no backend
   // Novos campos do XML
   classificacao?: string;
   formaFisica?: string;

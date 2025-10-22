@@ -7,20 +7,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Upload } from "lucide-react"
+import { Upload, CalendarDays } from "lucide-react"
 import { toast } from "sonner"
 import { importarXml } from "@/lib/importarXml";
 import type { Ingredient, Garantia, Substitutivo, ProductFormData } from "@/types/product.types";
+import { saveImportedProduct } from "@/app/components/products/useImportProduct"
 
 export function ProductForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  // Inicializa a data com o formato YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState<ProductFormData>({
     codigoProduto: "",
     nomeProduto: "",
     nrRevisao: "",
     vFormula: "",
-    data: "",
     // campos extras
     classificacao: "",
     formaFisica: "",
@@ -32,7 +34,8 @@ export function ProductForm() {
     modoUsar: "",
     conteudoLiquido: "",
     prazoValidade: "",
-    modoConservacao: "",
+    modoConservacao: "", 
+    data: today, // Mantém o campo data no formulário, mas note que ele não é salvo no backend atualmente.
     restricoes: ""
   });
 
@@ -63,8 +66,8 @@ export function ProductForm() {
       // Adaptar campos para ProductFormData
       setFormData((prev) => ({
         ...prev,
-        codigoProduto: data.codigo || "",
-        nomeProduto: data.nome || "",
+        codigoProduto: String(data.codigo || ""),
+        nomeProduto: String(data.nome || ""),
         classificacao: data.classificacao || "",
         formaFisica: data.formaFisica || "",
         composicao: (data.composicao || []).map((c) => ({
@@ -74,7 +77,6 @@ export function ProductForm() {
           valor: c.valor,
           unidade: "",
         })),
-        enriquecimento: data.enriquecimento || "",
         substitutivos: (data.substitutivos || []).map((s, idx) => ({
           code: "",
           descricao: s,
@@ -88,13 +90,14 @@ export function ProductForm() {
           unidade: n.unidade,
           minimo: n.min,
           maximo: n.max,
-        })),
-        indicacao: data.indicacao || "",
-        modoUsar: data.modoUsar || "",
-        conteudoLiquido: data.conteudoLiquido || "",
-        prazoValidade: data.prazoValidade || "",
-        modoConservacao: data.modoConservacao || "",
-        restricoes: data.restricoes || "",
+        })), 
+        enriquecimento: String(data.enriquecimento || ""),
+        indicacao: String(data.indicacao || ""),
+        modoUsar: String(data.modoUsar || ""),
+        conteudoLiquido: String(data.conteudoLiquido || ""),
+        prazoValidade: String(data.prazoValidade || ""), // Garante que seja sempre uma string
+        modoConservacao: String(data.modoConservacao || ""),
+        restricoes: String(data.restricoes || ""),
       }));
       toast.success("XML importado com sucesso!")
     } catch (error) {
@@ -107,21 +110,15 @@ export function ProductForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // Remove o campo 'data' do formData antes de enviar, pois ele não é mapeado no backend.
+    // Se 'data' precisar ser salvo, o schema do Prisma e o backend devem ser atualizados.
+    const { data, ...dataToSave } = formData; 
     try {
       setLoading(true)
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
+      // Usando a função saveImportedProduct do useImportProduct.ts
+      await saveImportedProduct(dataToSave);
 
-      if (!response.ok) {
-        throw new Error("Erro ao criar produto")
-      }
-
-      toast.success("Produto criado com sucesso!")
+      toast.success("Produto criado com sucesso!");
       router.push("/produtos")
       router.refresh()
     } catch (error) {
@@ -198,15 +195,17 @@ export function ProductForm() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="data">Data</Label>
-              <Input
-                id="data"
-                type="date"
-                value={formData.data}
-                onChange={(e) => setFormData({ ...formData, data: e.target.value })}
-                required
-              />
+            {/* O campo 'data' é mantido no formulário para preenchimento, mas não é enviado ao backend atualmente.
+                Se for necessário persistir esta data, o modelo Prisma e o backend precisarão ser atualizados. */}
+            <div className="space-y-2 relative">
+                <Label htmlFor="data">Data</Label>
+                <Input
+                    id="data"
+                    type="date"
+                    value={formData.data}
+                    onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+                    required
+                />
             </div>
           </div>
 

@@ -30,11 +30,11 @@ model Produto {
   formaFisica       String
   enriquecimento    String
   indicacao         String
-  modoUsar          String
-  conteudoLiquido   String
+  modoUsar        String @db.Text
+  conteudoLiquido String @db.Text
   prazoValidade     String
-  modoConservacao   String
-  restricoes        String
+  modoConservacao String @db.Text
+  restricoes      String @db.Text
   createdAt         DateTime @default(now())
   // Campos complexos podem ser serializados como JSON
   composicao        Json

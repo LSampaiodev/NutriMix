@@ -12,7 +12,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useRouter } from "next/navigation"
 
-export function ProductsTable() {
+export function ProductsTable() { 
   const router = useRouter()
   const { products, loading, error, filters, updateFilters, deleteProduct } = useProducts()
 
@@ -74,11 +74,9 @@ export function ProductsTable() {
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
-                  <TableHead>ID Etiqueta</TableHead>
                   <TableHead>Código</TableHead>
                   <TableHead>Nome do Produto</TableHead>
                   <TableHead>Revisão</TableHead>
-                  <TableHead>Fórmula</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="w-[50px]">Ações</TableHead>
@@ -88,18 +86,12 @@ export function ProductsTable() {
                 {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.id}</TableCell>
-                    <TableCell>{product.idEtiqueta}</TableCell>
-                    <TableCell className="font-mono text-sm">{product.codigoProduto}</TableCell>
-                    <TableCell>{product.nomeProduto}</TableCell>
-                    <TableCell>{product.nrRevisao}</TableCell>
-                    <TableCell>{product.vFormula}</TableCell>
-                    <TableCell>{product.data}</TableCell>
+                    <TableCell className="font-mono text-sm">{product.codigo}</TableCell>
+                    <TableCell>{product.nome}</TableCell>
+                    <TableCell>{product.versao}</TableCell>
+                    <TableCell>{new Date(product.createdAt).toLocaleDateString("pt-BR")}</TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        {product.bloqueada && <Badge variant="destructive">Bloqueado</Badge>}
-                        {product.assinatura && <Badge variant="default">Assinado</Badge>}
-                        {!product.bloqueada && !product.assinatura && <Badge variant="secondary">Ativo</Badge>}
-                      </div>
+                      <Badge variant="secondary">Ativo</Badge>
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -117,7 +109,7 @@ export function ProductsTable() {
                             <Edit className="h-4 w-4 mr-2" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(product.id)}>
+                          <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(String(product.id))}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Excluir
                           </DropdownMenuItem>
