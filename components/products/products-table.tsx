@@ -5,16 +5,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Plus, MoreHorizontal, Edit, Eye, Trash2 } from "lucide-react"
+import { Search, Plus, MoreHorizontal, Edit, Eye, Trash2, Tag } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useProducts } from "@/hooks/use-products"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { EmptyState } from "@/components/ui/empty-state"
+import { ProductSelectionDialog } from "@/components/products/product-selection-dialog"
+import { LabelPreview } from "@/components/label-preview"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import type { Product } from "@/types/product.types"
 
 export function ProductsTable() { 
   const router = useRouter()
   const { products, loading, error, filters, updateFilters, deleteProduct } = useProducts()
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const handleSearch = (value: string) => {
     updateFilters({ search: value })
@@ -24,6 +29,10 @@ export function ProductsTable() {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
       await deleteProduct(id)
     }
+  }
+
+  const handleProductSelected = (product: Product) => {
+    setSelectedProduct(product)
   }
 
   if (error) {
@@ -37,6 +46,7 @@ export function ProductsTable() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -51,6 +61,12 @@ export function ProductsTable() {
                 className="pl-8 w-full sm:w-[300px]"
               />
             </div>
+            <ProductSelectionDialog onProductSelected={handleProductSelected}>
+              <Button variant="outline">
+                <Tag className="h-4 w-4 mr-2" />
+                Selecionar Produto
+              </Button>
+            </ProductSelectionDialog>
             <Button onClick={() => router.push("/produtos/novo")}>
               <Plus className="h-4 w-4 mr-2" />
               Novo Produto
@@ -124,5 +140,23 @@ export function ProductsTable() {
         )}
       </CardContent>
     </Card>
+
+    {/* Preview do rótulo quando produto selecionado */}
+    {selectedProduct && (
+      <div className="mt-6">
+        <LabelPreview 
+          product={selectedProduct}
+          onPrint={(zplCode) => {
+            console.log("Imprimir ZPL:", zplCode)
+            // Implementar lógica de impressão
+          }}
+          onDownload={(zplCode) => {
+            console.log("Download ZPL:", zplCode)
+            // Implementar lógica de download
+          }}
+        />
+      </div>
+    )}
+  </>
   )
 }
