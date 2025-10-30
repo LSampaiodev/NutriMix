@@ -1,42 +1,102 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Printer, Download, Eye, Settings, AlertTriangle } from "lucide-react"
-import { ZPLGeneratorService } from "@/services/zpl-generator.service"
-import type { Product } from "@/types/product.types"
-
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Printer, Download, Eye, Settings, AlertTriangle } from "lucide-react";
+import { ZPLGeneratorService } from "@/services/zpl-generator.service";
+import type { Product } from "@/types/product.types";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 interface LabelPreviewProps {
-  product: Product
-  onPrint?: (zplCode: string) => void
-  onDownload?: (zplCode: string) => void
+  product: Product;
+  onPrint?: (zplCode: string) => void;
+  onDownload?: (zplCode: string) => void;
 }
 
-export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps) {
-  const [zplCode, setZplCode] = useState<string>("")
-  const [showZPL, setShowZPL] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
+export function LabelPreview({
+  product,
+  onPrint,
+  onDownload,
+}: LabelPreviewProps) {
+  const [zplCode, setZplCode] = useState<string>("");
+  const [showZPL, setShowZPL] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // Gerar código ZPL baseado nos dados do produto
   useEffect(() => {
     try {
-      const zpl = ZPLGeneratorService.generateZPL(product)
-      setZplCode(zpl)
+      const zpl = ZPLGeneratorService.generateZPL(product);
+      setZplCode(zpl);
     } catch (error) {
-      console.error("Erro ao gerar código ZPL:", error)
-      setZplCode("^XA\n^FO20,20^FDErro ao gerar rótulo^FS\n^XZ\n")
+      console.error("Erro ao gerar código ZPL:", error);
+      setZplCode("^XA\n^FO20,20^FDErro ao gerar rótulo^FS\n^XZ\n");
     }
-  }, [product])
+  }, [product]);
+
+  // Gerar preview da imagem usando a API Labelary
+  useEffect(() => {
+    if (!zplCode || showZPL) return;
+
+    setImageLoading(true);
+    setImageError(null);
+
+    // se já existe uma URL antiga, liberar pra evitar vazamento de memória
+    if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+    setPreviewImageUrl(null);
+
+    const generatePreview = async () => {
+      try {
+        const dpi = 8; // 203 DPI
+        const width = 4; // polegadas
+        const height = 6;
+        const url = `https://api.labelary.com/v1/printers/${dpi}dpmm/labels/${width}x${height}/0/`;
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            Accept: "image/png",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: zplCode,
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(
+            `Erro da API Labelary: ${response.status} - ${errText}`
+          );
+        }
+
+        const blob = await response.blob();
+        const imageUrl = URL.createObjectURL(blob);
+        setPreviewImageUrl(imageUrl);
+      } catch (error: any) {
+        setImageError(error.message);
+      } finally {
+        setImageLoading(false);
+      }
+    };
+
+    generatePreview();
+  }, [zplCode, showZPL]);
 
   const handlePrint = () => {
     if (onPrint) {
-      onPrint(zplCode)
+      onPrint(zplCode);
     } else {
       // Fallback: tentar imprimir diretamente
-      const printWindow = window.open('', '_blank')
+      const printWindow = window.open("", "_blank");
       if (printWindow) {
         printWindow.document.write(`
           <html>
@@ -49,37 +109,37 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
               </script>
             </body>
           </html>
-        `)
-        printWindow.document.close()
+        `);
+        printWindow.document.close();
       }
     }
-  }
+  };
 
   const handleDownload = () => {
     if (onDownload) {
-      onDownload(zplCode)
+      onDownload(zplCode);
     } else {
       // Fallback: download do arquivo ZPL
-      const blob = new Blob([zplCode], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `rotulo_${product.nome.replace(/\s+/g, '_')}.zpl`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      const blob = new Blob([zplCode], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = '${selectedProduct?.nome || "etiqueta"}.zpl';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     }
-  }
+  };
 
   const handleConfirmPrint = () => {
-    setShowConfirmation(true)
-  }
+    setShowConfirmation(true);
+  };
 
   const handleFinalPrint = () => {
-    handlePrint()
-    setShowConfirmation(false)
-  }
+    handlePrint();
+    setShowConfirmation(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -92,7 +152,11 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
               Preview do Rótulo - {product.nome}
             </CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowZPL(!showZPL)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowZPL(!showZPL)}
+              >
                 <Settings className="h-4 w-4 mr-2" />
                 {showZPL ? "Visualizar" : "ZPL"}
               </Button>
@@ -120,13 +184,20 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
                   Confirmar Impressão
                 </h3>
                 <p className="text-orange-700 mb-4">
-                  Deseja realmente imprimir o rótulo do produto <strong>{product.nome}</strong>?
+                  Deseja realmente imprimir o rótulo do produto{" "}
+                  <strong>{product.nome}</strong>?
                 </p>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setShowConfirmation(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowConfirmation(false)}
+                  >
                     Cancelar
                   </Button>
-                  <Button onClick={handleFinalPrint} className="bg-orange-600 hover:bg-orange-700">
+                  <Button
+                    onClick={handleFinalPrint}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
                     <Printer className="h-4 w-4 mr-2" />
                     Sim, Imprimir
                   </Button>
@@ -156,119 +227,31 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Preview do Rótulo</CardTitle>
+              <CardDescription className="text-xs">
+                Imagem gerada via Labelary API
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 bg-white min-h-[500px]">
-                <div className="space-y-3">
-                  {/* Logo e nome do produto */}
-                  <div className="text-center border-b pb-3">
-                    <div className="mb-2">
-                      <div className="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold">TH</span>
-                      </div>
-                    </div>
-                    <h2 className="font-bold text-lg">{product.nome}</h2>
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {product.classificacao || "Alimento"}
-                    </Badge>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 bg-white min-h-[250px] flex items-center justify-center">
+                {imageLoading && <LoadingSpinner />}
+                {imageError && (
+                  <div className="text-center text-destructive">
+                    <p>Erro ao gerar preview:</p>
+                    <p className="text-xs">{imageError}</p>
                   </div>
-
-                  {/* Composição */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Composição:</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {product.composicao?.map(ing => `${ing.nome} ${ing.valor}${ing.unidade}`).join(", ") || "Não especificada"}
-                    </p>
-                  </div>
-
-                  {/* Substitutivos */}
-                  {product.substitutivos && product.substitutivos.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-sm">Substitutivos:</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {product.substitutivos.map(sub => sub.descricao).join(", ")}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Níveis de garantia */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Níveis de Garantia:</h4>
-                    <p className="text-xs text-muted-foreground">
-                      {product.niveisGarantia?.map(gar => `${gar.nome}: ${gar.valor}${gar.unidade}`).join(", ") || "Não especificada"}
-                    </p>
-                  </div>
-
-                  {/* Peso líquido */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Peso Líquido:</h4>
-                    <p className="text-xs">{product.conteudoLiquido || "Não especificado"}</p>
-                  </div>
-
-                  {/* Indicação de uso */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Indicação de Uso:</h4>
-                    <p className="text-xs text-muted-foreground">{product.indicacao || "Para alimentação animal"}</p>
-                  </div>
-
-                  {/* Modo de usar */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Modo de Usar:</h4>
-                    <p className="text-xs text-muted-foreground">{product.modoUsar || "Conforme orientação técnica"}</p>
-                  </div>
-
-                  <Separator />
-
-                  {/* Restrições */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Restrições:</h4>
-                    <p className="text-xs text-muted-foreground">{product.restricoes || "Manter em local seco e arejado"}</p>
-                  </div>
-
-                  {/* Dados da empresa */}
-                  <div className="border-t pt-3">
-                    <h4 className="font-semibold text-sm">Fabricante:</h4>
-                    <p className="text-xs">TagTwo Indústria e Comércio Ltda</p>
-                    <p className="text-xs text-muted-foreground">Rua Exemplo, 123, Centro, Cidade - UF</p>
-                    <p className="text-xs text-muted-foreground">CNPJ: 12.345.678/0001-90</p>
-                    <p className="text-xs text-muted-foreground">Tel: (11) 1234-5678</p>
-                  </div>
-
-                  {/* Origem */}
-                  <div>
-                    <p className="text-xs font-semibold">Indústria Brasileira</p>
-                  </div>
-
-                  {/* Datas e lote */}
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="font-semibold">Fabricado:</span> {new Date().toLocaleDateString("pt-BR")}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Validade:</span> {product.prazoValidade || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString("pt-BR")}
-                    </div>
-                    <div className="col-span-2">
-                      <span className="font-semibold">Lote:</span> LOTE-{product.codigo}-{Date.now().toString().slice(-6)}
-                    </div>
-                  </div>
-
-                  {/* Condições de conservação */}
-                  <div>
-                    <h4 className="font-semibold text-sm">Conservação:</h4>
-                    <p className="text-xs text-muted-foreground">{product.modoConservacao || "Manter em local seco, arejado e protegido da luz solar"}</p>
-                  </div>
-
-                  {/* Código de barras */}
-                  {product.codigo && (
-                    <div className="text-center">
-                      <div className="inline-block bg-white p-2 border">
-                        {/* Placeholder para código de barras */}
-                        <div className="h-8 bg-black w-32 mx-auto"></div>
-                        <p className="text-xs mt-1">{product.codigo}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
+                {previewImageUrl && !imageLoading && (
+                  <img
+                    src={previewImageUrl}
+                    alt={`Preview do rótulo para ${product.nome}`}
+                    className="max-w-full h-auto"
+                  />
+                )}
+                {!previewImageUrl && !imageLoading && !imageError && (
+                  <p className="text-muted-foreground">
+                    Gerando imagem do rótulo...
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -280,7 +263,9 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="font-semibold text-sm mb-2">Configuração da Impressora</h4>
+                <h4 className="font-semibold text-sm mb-2">
+                  Configuração da Impressora
+                </h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
                     <span>Modelo:</span>
@@ -292,11 +277,11 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
                   </div>
                   <div className="flex justify-between">
                     <span>Resolução:</span>
-                    <span>300 DPI</span>
+                    <span>203 DPI</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tamanho:</span>
-                    <span>100mm x 50mm</span>
+                    <span>100mm x 150mm</span>
                   </div>
                 </div>
               </div>
@@ -304,7 +289,9 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
               <Separator />
 
               <div>
-                <h4 className="font-semibold text-sm mb-2">Campos Obrigatórios</h4>
+                <h4 className="font-semibold text-sm mb-2">
+                  Campos Obrigatórios
+                </h4>
                 <div className="space-y-1 text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -365,5 +352,5 @@ export function LabelPreview({ product, onPrint, onDownload }: LabelPreviewProps
         </div>
       )}
     </div>
-  )
+  );
 }

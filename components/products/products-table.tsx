@@ -147,12 +147,32 @@ export function ProductsTable() {
         <LabelPreview 
           product={selectedProduct}
           onPrint={(zplCode) => {
-            console.log("Imprimir ZPL:", zplCode)
-            // Implementar lógica de impressão
+            // AQUI VOCÊ PRECISA IMPLEMENTAR A LÓGICA DE IMPRESSÃO REAL.
+            // Por exemplo, enviar o zplCode para um backend que se comunica com a impressora,
+            // ou, para um teste rápido, usar o diálogo de impressão do navegador.
+            console.log("Código ZPL para impressão:", zplCode);
+            
+            // Exemplo de implementação para abrir o diálogo de impressão do navegador (apenas para teste/fallback)
+            // Para uma impressora Zebra real, você enviaria isso para um backend.
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+              printWindow.document.write(`<pre>${zplCode}</pre><script>window.print(); setTimeout(() => window.close(), 1000);</script>`);
+              printWindow.document.close();
+            } else {
+              alert('Não foi possível abrir a janela de impressão. Verifique se os pop-ups estão bloqueados.');
+            }
           }}
           onDownload={(zplCode) => {
             console.log("Download ZPL:", zplCode)
-            // Implementar lógica de download
+                  const blob = new Blob([zplCode], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = '${selectedProduct?.nome || "etiqueta"}.txt';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
           }}
         />
       </div>

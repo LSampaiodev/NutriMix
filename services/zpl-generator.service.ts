@@ -60,10 +60,10 @@ export class ZPLGeneratorService {
     
     // Níveis de garantia (truncada)
     const garantias = this.truncateText(this.getNiveisGarantia(product), 60)
-    zpl += `^FO20,110^FDGarantias: ${this.escapeZPL(garantias)}^FS\n`
+    zpl += `^FO20,110^FDNivéis deGarantias: ${this.escapeZPL(garantias)}^FS\n`
     
     // Peso líquido
-    zpl += `^FO20,130^FDPeso: ${this.escapeZPL(product.conteudoLiquido || "Não especificado")}^FS\n`
+    zpl += `^FO20,130^FDEnriquecimento: ${this.escapeZPL(product.enriquecimento || "Não especificado")}^FS\n`
     
     // Indicação de uso (truncada)
     const indicacao = this.truncateText(product.indicacao || "Para alimentação animal", 60)
@@ -75,7 +75,7 @@ export class ZPLGeneratorService {
     
     // Restrições (truncada)
     const restricoes = this.truncateText(product.restricoes || "Manter em local seco e arejado", 60)
-    zpl += `^FO20,190^FDRestrições: ${this.escapeZPL(restricoes)}^FS\n`
+    zpl += `^FO20,190^FDRestrições e outras recomendações: ${this.escapeZPL(restricoes)}^FS\n`
     
     // Dados da empresa
     zpl += `^CF0,${finalConfig.fontSizes.small}\n`
