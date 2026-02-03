@@ -9,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Printer, Save, Eye, NotepadTextDashed, Settings, Palette, Type, ImageIcon } from "lucide-react"
+import { Printer, NotepadTextDashed, Settings, Palette, ImageIcon } from "lucide-react"
+import { ProductSelectionDialog } from "@/components/products/product-selection-dialog"
+import { LabelPreview } from "@/components/label-preview"
+import type { Product } from "@/types/product.types"
 
 export function LabelDesigner() {
   const [labelData, setLabelData] = useState({
@@ -22,6 +25,17 @@ export function LabelDesigner() {
     lote: "",
     peso: ""
   });
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  const handleProductSelected = (product: Product) => {
+    setSelectedProduct(product)
+    setLabelData((prev) => ({
+      ...prev,
+      codigo: product.codigo || "",
+      idRotulo: String(product.id ?? ""),
+      descricao: product.nome || ""
+    }))
+  }
   return (
     <div className="space-y-6">
       {/* Header com ações principais */}
@@ -38,10 +52,12 @@ export function LabelDesigner() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <NotepadTextDashed className="h-4 w-4 mr-2" />
-                Selecionar Produto
-              </Button>
+              <ProductSelectionDialog onProductSelected={handleProductSelected}>
+                <Button variant="outline" size="sm">
+                  <NotepadTextDashed className="h-4 w-4 mr-2" />
+                  Selecionar Produto
+                </Button>
+              </ProductSelectionDialog>
               <div className="relative group">
                 <Button size="sm" type="button">
                   <Printer className="h-4 w-4 mr-2" />
@@ -258,24 +274,17 @@ export function LabelDesigner() {
                 </TabsContent>
 
                 <TabsContent value="preview" className="space-y-4">
-                  <div className="border rounded-lg p-6 bg-white min-h-[400px]">
-                    <div className="text-center">
-                      <div className="mb-4">
-                        <img
-                          src="/images/tag-company-logo.png" // TODO: Alterar para o logo da empresa
-                          alt="NutriMix"
-                          className="mx-auto h-16 object-contain"
-                        />
-                      </div>
-                      <h3 className="font-bold text-lg mb-2">ROYALMIX TERRA LB</h3>
-                      <p className="text-sm mb-4">Código: GCP3118-T</p>
-                      <div className="text-xs space-y-1">
-                        <p>Lote: 089020250001</p>
-                        <p>Data: {labelData.data}</p>
-                        <p>Peso: 25kg</p>
+                  {selectedProduct ? (
+                    <LabelPreview product={selectedProduct} />
+                  ) : (
+                    <div className="border rounded-lg p-6 bg-white min-h-[400px] flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <ImageIcon className="mx-auto h-12 w-12 mb-4" />
+                        <p className="text-lg font-medium">Selecione um produto</p>
+                        <p className="text-sm">Escolha um produto para gerar o preview do rótulo</p>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>

@@ -1,4 +1,4 @@
-// File: C:\Users\losampaio\Projetos\TagTwo\app\rotulos\page.tsx
+// File: C:\Users\losampaio\Projetos\NutriMix_2.0\app\rotulos\page.tsx
 import * as entry from '../../../../app/rotulos/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

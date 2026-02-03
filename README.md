@@ -112,4 +112,4 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ## 🤝 Suporte
 
-Para suporte, envie um email para suporte@tagtwo.com ou abra uma issue no repositório.
+Para suporte, envie um email para lucasoliveirasampaio55@outlook.com ou abra uma issue no repositório.
