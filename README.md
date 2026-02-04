@@ -1,115 +1,76 @@
-# TagTwo - Sistema de Gerenciamento de Ração
+# NutriMix - Sistema de Automação e Rotulagem
 
-Um sistema moderno para gerenciamento de fórmulas de ração, geração de labels e visualização de dados XML.
+Plataforma para gestão de produtos, rótulos, impressões e integrações por unidade (planta), com importação de XML, geração de preview (Labelary/ZPL) e controle de usuários.
 
-## 🚀 Características
+## Principais recursos
+- Login e controle de acesso por unidade e permissão
+- Importação de XML e parsing de fórmulas
+- Gestão de produtos e rótulos
+- Preview de rótulos via Labelary
+- Histórico de impressão e listagens
+- Emissão de certificados
 
-- **Upload e Processamento de XML**: Carregue e processe arquivos XML de fórmulas de ração
-- **Geração de Labels**: Crie labels personalizados para produtos
-- **Dashboard Interativo**: Visualize estatísticas e dados em tempo real
-- **Interface Responsiva**: Design moderno e adaptável para diferentes dispositivos
-- **Autenticação Segura**: Sistema de login com JWT
-- **Arquitetura Limpa**: Seguindo princípios SOLID e padrão MVC
+## Stack
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **UI**: Radix UI + shadcn/ui
+- **Estilo**: Tailwind CSS
+- **Backend**: Express + Prisma (MySQL)
 
-## 🛠️ Tecnologias
-
-- **Frontend**: React 18 + TypeScript
-- **UI Components**: Radix UI + Shadcn/ui
-- **Styling**: Tailwind CSS
-- **State Management**: TanStack Query
-- **Routing**: React Router DOM
-- **Forms**: React Hook Form + Zod
-- **Build Tool**: Vite
-
-## 📁 Estrutura do Projeto
-
+## Estrutura
 ```
-src/
-├── core/                 # Camada de domínio (Model)
-│   ├── entities/        # Entidades de negócio
-│   ├── repositories/    # Interfaces de repositórios
-│   └── services/        # Serviços de domínio
-├── infrastructure/      # Camada de infraestrutura
-│   ├── api/            # Cliente HTTP e APIs
-│   ├── storage/        # Gerenciamento de estado local
-│   └── adapters/       # Adaptadores para serviços externos
-├── presentation/        # Camada de apresentação (View + Controller)
-│   ├── components/     # Componentes React reutilizáveis
-│   ├── pages/          # Páginas da aplicação
-│   ├── hooks/          # Custom hooks
-│   └── layouts/        # Layouts da aplicação
-├── shared/             # Código compartilhado
-│   ├── types/          # Tipos TypeScript
-│   ├── constants/      # Constantes da aplicação
-│   └── utils/          # Utilitários
-└── main.tsx           # Ponto de entrada
+app/                 # Rotas do Next.js (App Router)
+components/          # Componentes compartilhados
+pages/api/           # Proxies para o backend
+backend/             # API Express + Prisma
+  prisma/            # Schema e migrations
+  src/               # Rotas e serviços
 ```
 
-## 🚀 Como Executar
+## Pré-requisitos
+- Node.js 18+
+- MySQL disponível (ex.: `nutrimix` em `localhost:3306`)
 
-### Pré-requisitos
-
-- Node.js 18+ 
-- npm ou yarn
-
-### Instalação
-
-1. Clone o repositório:
-```bash
-git clone <repository-url>
-cd TagTwo
+## Configuração
+1. Ajuste o banco no arquivo `backend/.env`:
+```
+DATABASE_URL="mysql://root:@localhost:3306/nutrimix"
 ```
 
-2. Instale as dependências:
-```bash
+2. Instale dependências:
+```
+cd backend
+npm install
+cd ..
 npm install
 ```
 
-3. Execute o projeto em modo de desenvolvimento:
-```bash
+3. Rode migrations e seed (cria o admin padrão):
+```
+cd backend
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+## Rodando localmente
+1. Backend:
+```
+cd backend
+npm run start
+```
+
+2. Frontend:
+```
 npm run dev
 ```
 
-4. Acesse `http://localhost:5173` no seu navegador
+3. Acesse:
+```
+http://localhost:3000
+```
 
-### Scripts Disponíveis
+## Login padrão (seed)
+- **Login**: `losampaio`
+- **Senha**: `123MUdar456`
 
-- `npm run dev` - Inicia o servidor de desenvolvimento
-- `npm run build` - Gera build de produção
-- `npm run build:dev` - Gera build de desenvolvimento
-- `npm run lint` - Executa o linter
-- `npm run preview` - Visualiza o build de produção
-
-## 🏗️ Arquitetura
-
-O projeto segue os princípios SOLID e o padrão MVC:
-
-### **Model (Domínio)**
-- `core/entities/` - Entidades de negócio
-- `core/services/` - Lógica de negócio
-- `core/repositories/` - Interfaces de acesso a dados
-
-### **View (Apresentação)**
-- `presentation/components/` - Componentes React
-- `presentation/pages/` - Páginas da aplicação
-- `presentation/layouts/` - Layouts
-
-### **Controller (Controle)**
-- `presentation/hooks/` - Custom hooks para lógica de controle
-- `infrastructure/api/` - Controllers para APIs
-
-## 📝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 🤝 Suporte
-
-Para suporte, envie um email para lucasoliveirasampaio55@outlook.com ou abra uma issue no repositório.
+## Licença
+MIT. Veja o arquivo `LICENSE`.

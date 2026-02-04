@@ -1,5 +1,11 @@
 {
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js"
+  "/_document": "pages/_document.js",
+  "/api/listagens": "pages/api/listagens.js",
+  "/api/historico": "pages/api/historico.js",
+  "/api/certificados": "pages/api/certificados.js",
+  "/api/xml": "pages/api/xml.js",
+  "/api/users": "pages/api/users.js",
+  "/api/products": "pages/api/products.js"
 }

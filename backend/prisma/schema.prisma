@@ -13,16 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserPermission {
+  CADASTRO
+  IMPRESSAO
+  AVANCADO
+  AMBOS
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
+  id                     Int            @id @default(autoincrement())
+  login                  String         @unique
+  email                  String         @unique
+  passwordHash           String
+  name                   String
+  isActive               Boolean        @default(true)
+  isAdmin                Boolean        @default(false)
+  permission             UserPermission @default(CADASTRO)
+  canAccessOtherUnits    Boolean        @default(false)
+  isResponsibleTechnician Boolean       @default(false)
+  unitCode               String
+  createdAt              DateTime       @default(now())
 }
 
 model Produto {
   id                Int      @id @default(autoincrement())
+  idEtiqueta         String?
   codigo            String
   versao            String
   nome              String
@@ -36,9 +51,49 @@ model Produto {
   modoConservacao String @db.Text
   restricoes      String @db.Text
   createdAt         DateTime @default(now())
+  rotulo            String?
   // Campos complexos podem ser serializados como JSON
   composicao        Json
   substitutivos     Json
   niveisGarantia    Json
 }
 
+model Certificado {
+  id             Int      @id @default(autoincrement())
+  idEtiqueta     String
+  lote           String
+  codigoProduto  String
+  nomeProduto    String
+  dataFabricacao DateTime
+  createdAt      DateTime @default(now())
+}
+
+model XmlImportacao {
+  id           Int      @id @default(autoincrement())
+  idEmpresa    String
+  idRTPI       String
+  revisao      String
+  idEtiqueta   String
+  codigoProduto String
+  nomeProduto  String
+  lingua       String
+  nomeArquivo  String
+  dataInclusao DateTime
+  arquivo      String
+  createdAt    DateTime @default(now())
+}
+
+model ImpressaoHistorico {
+  id            Int      @id @default(autoincrement())
+  idEtiqueta    String
+  idUsuario     String
+  nome          String
+  codigoUnidade String
+  unidade       String
+  qtd           Int
+  dataHora      DateTime
+  lote          String
+  codigoProduto String
+  peso          String
+  createdAt     DateTime @default(now())
+}

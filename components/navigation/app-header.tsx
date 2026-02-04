@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
@@ -12,11 +14,30 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export function AppHeader() {
   const { currentPageTitle } = useNavigation()
   const { isMobile, toggleDesktopSidebar } = useSidebarResponsive()
+  const router = useRouter()
+  const [displayName, setDisplayName] = useState("Admin")
 
   const handleSidebarToggle = () => {
     if (!isMobile) {
       toggleDesktopSidebar()
     }
+  }
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("nutrimix.user")
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser)
+        setDisplayName(user?.name || user?.login || "Admin")
+      } catch {
+        setDisplayName("Admin")
+      }
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem("nutrimix.user")
+    router.push("/login")
   }
 
   return (
@@ -38,13 +59,13 @@ export function AppHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
                 <User className="h-4 w-4" />
-                <span className="hidden md:inline ml-2">Admin</span>
+                <span className="hidden md:inline ml-2">{displayName}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Perfil</DropdownMenuItem>
               <DropdownMenuItem>Configurações</DropdownMenuItem>
-              <DropdownMenuItem>Sair</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>Sair</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

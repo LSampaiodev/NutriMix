@@ -88,8 +88,8 @@ export function LabelDesigner() {
                   <Input
                     id="codigo"
                     value={labelData.codigo}
-                    onChange={(e) => setLabelData({ ...labelData, codigo: e.target.value })}
                     placeholder="Ex: GCP3118-T"
+                    readOnly
                   />
                 </div>
                 <div>
@@ -97,8 +97,8 @@ export function LabelDesigner() {
                   <Input
                     id="idRotulo"
                     value={labelData.idRotulo}
-                    onChange={(e) => setLabelData({ ...labelData, idRotulo: e.target.value })}
                     placeholder="Ex: 4529"
+                    readOnly
                   />
                 </div>
               </div>
@@ -108,9 +108,9 @@ export function LabelDesigner() {
                 <Textarea
                   id="descricao"
                   value={labelData.descricao}
-                  onChange={(e) => setLabelData({ ...labelData, descricao: e.target.value })}
                   placeholder="Descrição do produto..."
                   rows={3}
+                  readOnly
                 />
               </div>
 
